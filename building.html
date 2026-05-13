@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinner Buddy — Building Your Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #FAF8F3;
+  --ink: #1C1A16;
+  --ink-light: #6B6760;
+  --ink-faint: #C4C0B8;
+  --green: #2A7A5A;
+  --green-light: #E8F4EE;
+  --border: rgba(28,26,22,0.12);
+  --radius: 12px;
+}
+html, body { height: 100%; background: var(--cream); font-family: 'DM Sans', sans-serif; }
+body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+
+.logo { font-family: 'Lora', serif; font-size: 18px; font-weight: 500; display: flex; align-items: center; gap: 9px; margin-bottom: 48px; color: var(--ink); }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+/* ANIMATED PLATE */
+.plate-wrap { position: relative; width: 120px; height: 120px; margin: 0 auto 40px; }
+.plate {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: white; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.sparkle {
+  position: absolute; font-size: 18px;
+  animation: orbit 3s linear infinite;
+}
+.sparkle:nth-child(2) { animation-delay: -1s; }
+.sparkle:nth-child(3) { animation-delay: -2s; }
+@keyframes orbit {
+  0%   { top: 0px;  left: 50%; transform: translateX(-50%); opacity: 1; }
+  25%  { top: 25%;  left: 90%; opacity: 1; }
+  50%  { top: 80%;  left: 50%; transform: translateX(-50%); opacity: 0.4; }
+  75%  { top: 25%;  left: 5%;  opacity: 1; }
+  100% { top: 0px;  left: 50%; transform: translateX(-50%); opacity: 1; }
+}
+
+.greeting { font-family: 'Lora', serif; font-size: 28px; font-weight: 400; margin-bottom: 10px; color: var(--ink); }
+.greeting em { font-style: italic; color: var(--green); }
+.sub { font-size: 15px; color: var(--ink-light); margin-bottom: 40px; max-width: 360px; line-height: 1.6; }
+
+/* STEPS */
+.steps { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-bottom: 48px; }
+.step {
+  display: flex; align-items: center; gap: 14px;
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 16px;
+  font-size: 14px; color: var(--ink-light);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s, color 0.3s;
+}
+.step.visible { opacity: 1; transform: translateY(0); }
+.step.done { border-color: var(--green); color: var(--ink); }
+.step-icon { font-size: 18px; flex-shrink: 0; }
+.step-check {
+  margin-left: auto; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--green-light); display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.3s;
+  flex-shrink: 0;
+}
+.step.done .step-check { opacity: 1; }
+.step-check svg { width: 10px; height: 10px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.continue-btn {
+  padding: 13px 32px; font-size: 15px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; background: var(--green); color: white;
+  border: none; border-radius: 8px; cursor: pointer;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease, background 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.continue-btn.visible { opacity: 1; transform: translateY(0); }
+.continue-btn:hover { background: #1f5e43; }
+</style>
+</head>
+<body>
+
+<div class="logo"><div class="logo-dot"></div> Dinner Buddy</div>
+
+<div class="plate-wrap">
+  <div class="plate">🍽️</div>
+  <span class="sparkle">✨</span>
+  <span class="sparkle">⭐</span>
+  <span class="sparkle">✨</span>
+</div>
+
+<h1 class="greeting">Building your plan, <em id="name-display">friend</em></h1>
+<p class="sub">We're putting together this week's meal options based on your preferences.</p>
+
+<div class="steps">
+  <div class="step" id="step1">
+    <span class="step-icon">📋</span>
+    <span>Reading your preferences</span>
+    <div class="step-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+  </div>
+  <div class="step" id="step2">
+    <span class="step-icon">🍳</span>
+    <span>Selecting this week's meals</span>
+    <div class="step-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+  </div>
+  <div class="step" id="step3">
+    <span class="step-icon">🛒</span>
+    <span>Preparing your grocery list</span>
+    <div class="step-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+  </div>
+</div>
+
+<button class="continue-btn" id="continue-btn" onclick="goToSelector()">
+  See my meals
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap: "round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+</button>
+
+<script>
+// Get name from URL
+const params = new URLSearchParams(window.location.search);
+const name = params.get('name') || '';
+if (name) document.getElementById('name-display').textContent = name;
+
+// Animate steps in sequence
+function showStep(id, delay) {
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    el.classList.add('visible');
+    setTimeout(() => el.classList.add('done'), 600);
+  }, delay);
+}
+
+showStep('step1', 400);
+showStep('step2', 1200);
+showStep('step3', 2000);
+
+// Show continue button after all steps
+setTimeout(() => {
+  document.getElementById('continue-btn').classList.add('visible');
+}, 3000);
+
+function goToSelector() {
+  const nameParam = name ? '?name=' + encodeURIComponent(name) : '';
+  window.location.href = 'selector.html' + nameParam;
+}
+</script>
+</body>
+</html>
