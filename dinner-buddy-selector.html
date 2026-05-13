@@ -195,7 +195,7 @@ const CONFIG = {
 
   // ── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW ──
   // (Leave as "" until you've set up the Google Sheet — see SETUP.md)
-  sheetURL: "https://script.google.com/macros/s/AKfycbwf0NjLHcnG5JUcuEtpcsp1gFSsBApWbxWy_bwUmgI9pgVX-ff2twvgYeggGJwCWZnZug/exec",
+  sheetURL: "",
 
   meals: [
     { id:1,  name:"Chicken Shawarma Bowls",          emoji:"🥙", time:45, skill:"Medium", tags:["chicken"],       sides:"Pita Bread" },
@@ -417,34 +417,38 @@ function confirmSubmit() {
   closeModal();
 
   const selections = [...selected].map(id => CONFIG.meals.find(m => m.id === id).name);
-  const schedule = DAYS.map(d => {
+  const scheduleObj = {};
+  DAYS.forEach(d => {
+    const id = dayMap[d];
+    if (id) scheduleObj[d] = CONFIG.meals.find(m => m.id === id).name;
+  });
+  const scheduleStr = DAYS.map(d => {
     const id = dayMap[d];
     if (!id) return d + ': (unassigned)';
     return d + ': ' + CONFIG.meals.find(m => m.id === id).name;
   }).join(', ');
 
+  // Send to Google Sheet
   if (CONFIG.sheetURL) {
     const params = new URLSearchParams({
       name: name,
       week: CONFIG.weekLabel,
       meals: selections.join(' | '),
-      schedule: schedule,
+      schedule: scheduleStr,
       timestamp: new Date().toISOString()
     });
     fetch(CONFIG.sheetURL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
       .catch(() => {});
   }
 
-  document.getElementById('main-hero').style.display = 'none';
-  document.querySelector('.filter-bar').style.display = 'none';
-  document.querySelector('.grid-wrap').style.display = 'none';
-  document.getElementById('sticky-footer').style.display = 'none';
-  document.getElementById('setup-banner').style.display = 'none';
-
-  const ss = document.getElementById('success-screen');
-  ss.classList.add('show');
-  document.getElementById('success-msg').textContent =
-    `Thanks, ${name}! Your ${selections.length} meals for ${CONFIG.weekLabel} have been sent. Your personalized plan will be ready soon.`;
+  // Build URL params for plan page and redirect
+  const planParams = new URLSearchParams({
+    name: name,
+    week: CONFIG.weekLabel,
+    family: CONFIG.familyLabel,
+    schedule: JSON.stringify(scheduleObj)
+  });
+  window.location.href = 'plan.html?' + planParams.toString();
 }
 
 // ─── KICK OFF ───
