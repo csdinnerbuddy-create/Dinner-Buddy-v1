@@ -452,17 +452,12 @@ function confirmSubmit() {
     document.getElementById('submit-btn').disabled = true;
 
     // Give the Sheet request 2 seconds to complete, then redirect regardless
-    const sheetDone = fetch(CONFIG.sheetURL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' })
-      .catch(() => {});
-    const timeout = new Promise(resolve => setTimeout(resolve, 2000));
-
-    Promise.race([sheetDone, timeout]).then(() => {
-      window.location.href = planURL;
-    });
-  } else {
-    window.location.href = planURL;
-  }
-}
+ // Use image ping — never cancelled by browser navigation
+const img = new Image();
+img.src = CONFIG.sheetURL + '?' + params.toString();
+setTimeout(() => {
+  window.location.href = planURL;
+}, 1500);
 
 // ─── KICK OFF ───
 renderGrid();
