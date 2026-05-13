@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinner Buddy — Your Weekly Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #FAF8F3;
+  --ink: #1C1A16;
+  --ink-light: #6B6760;
+  --ink-faint: #C4C0B8;
+  --green: #2A7A5A;
+  --green-light: #E8F4EE;
+  --green-mid: #4BAF84;
+  --border: rgba(28,26,22,0.12);
+  --border-strong: rgba(28,26,22,0.22);
+  --radius: 12px;
+  --radius-sm: 7px;
+}
+html { background: var(--cream); color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; }
+body { max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* HEADER */
+header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 18px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+.logo { font-family: 'Lora', serif; font-size: 18px; font-weight: 500; display: flex; align-items: center; gap: 9px; }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.meta { font-size: 13px; color: var(--ink-light); text-align: right; line-height: 1.4; }
+
+/* SECTION TITLES */
+.section-title {
+  font-family: 'Lora', serif; font-size: 22px; font-weight: 400;
+  margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title em { font-style: italic; color: var(--green); }
+
+/* WEEK STRIP */
+.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 44px; }
+.day-block { background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
+.day-block .day-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 5px; }
+.day-block .day-emoji { font-size: 22px; margin-bottom: 4px; }
+.day-block .day-meal { font-size: 11px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+
+/* RECIPES */
+.recipes-grid { display: flex; flex-direction: column; gap: 24px; margin-bottom: 48px; }
+.recipe-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.recipe-header { display: flex; align-items: center; gap: 16px; padding: 18px 20px 16px; border-bottom: 1px solid var(--border); }
+.recipe-emoji { font-size: 32px; flex-shrink: 0; }
+.recipe-title-block { flex: 1; }
+.recipe-name { font-family: 'Lora', serif; font-size: 18px; font-weight: 500; margin-bottom: 5px; }
+.recipe-day-badge { font-size: 11px; background: var(--green-light); color: var(--green); padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+.recipe-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.rtag { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #F2F0EB; color: var(--ink-light); }
+.recipe-body { display: grid; grid-template-columns: 1fr 1.6fr; gap: 0; }
+.recipe-ingredients { padding: 16px 20px; border-right: 1px solid var(--border); }
+.recipe-instructions { padding: 16px 20px; }
+.col-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 10px; }
+.ing-list { list-style: none; }
+.ing-list li { font-size: 13px; color: var(--ink); padding: 3px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+.ing-list li:last-child { border-bottom: none; }
+.ing-list li::before { content: "·"; color: var(--green); flex-shrink: 0; }
+.inst-list { list-style: none; counter-reset: step; }
+.inst-list li { font-size: 13px; color: var(--ink); padding: 4px 0 4px 28px; position: relative; border-bottom: 1px solid var(--border); counter-increment: step; }
+.inst-list li:last-child { border-bottom: none; }
+.inst-list li::before { content: counter(step); position: absolute; left: 0; top: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--green-light); color: var(--green); font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+.prep-note { font-size: 12px; color: var(--ink-light); font-style: italic; padding: 10px 20px; background: var(--cream); border-top: 1px solid var(--border); }
+
+/* GROCERY LIST */
+.grocery-section { margin-bottom: 48px; }
+.grocery-intro { font-size: 13px; color: var(--ink-light); margin-bottom: 20px; }
+.grocery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.grocery-cat { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.grocery-cat-header { padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.grocery-cat-icon { font-size: 16px; }
+.grocery-cat-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+.grocery-cat-count { font-size: 11px; color: var(--ink-faint); margin-left: auto; }
+.grocery-items { padding: 6px 0; }
+.grocery-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 16px; cursor: pointer; transition: background 0.1s; }
+.grocery-item:hover { background: var(--cream); }
+.grocery-item.checked { opacity: 0.45; }
+.grocery-item.checked .gi-name { text-decoration: line-through; }
+.gi-check { width: 16px; height: 16px; border: 1.5px solid var(--border-strong); border-radius: 3px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.grocery-item.checked .gi-check { background: var(--green); border-color: var(--green); }
+.gi-check svg { width: 9px; height: 9px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.15s; }
+.grocery-item.checked .gi-check svg { opacity: 1; }
+.gi-name { font-size: 13px; color: var(--ink); line-height: 1.4; }
+.gi-qty { font-size: 11px; color: var(--ink-faint); }
+
+/* PRINT / RESET */
+.actions { display: flex; gap: 10px; margin-bottom: 32px; }
+.action-btn { padding: 8px 18px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--ink-light); }
+.action-btn:hover { border-color: var(--border-strong); color: var(--ink); }
+.action-btn.primary { background: var(--green); color: white; border-color: var(--green); }
+.action-btn.primary:hover { background: #1f5e43; }
+
+@media (max-width: 600px) {
+  .week-strip { grid-template-columns: repeat(4, 1fr); }
+  .recipe-body { grid-template-columns: 1fr; }
+  .recipe-ingredients { border-right: none; border-bottom: 1px solid var(--border); }
+  .grocery-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  @page { margin: 0.5in; size: letter; }
+  .actions { display: none; }
+  header { margin-bottom: 12px; padding: 8px 0; }
+  body { padding-bottom: 0; font-size: 11px; max-width: 100%; }
+  .grocery-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; }
+  .grocery-section { margin-bottom: 16px; }
+  .grocery-cat { border: 0.5px solid #ccc; border-radius: 4px; break-inside: avoid; }
+  .grocery-cat-header { padding: 6px 10px; }
+  .grocery-cat-name { font-size: 11px; }
+  .grocery-item { padding: 3px 10px; }
+  .gi-name { font-size: 11px; line-height: 1.3; }
+  .gi-check { width: 11px; height: 11px; border: 1px solid #999; border-radius: 2px; flex-shrink: 0; }
+  .gi-check svg { display: none; }
+  .grocery-intro { font-size: 11px; margin-bottom: 8px; }
+  .week-strip { gap: 4px; margin-bottom: 12px; }
+  .day-block { padding: 5px 4px; }
+  .day-block .day-emoji { font-size: 14px; }
+  .day-block .day-meal { font-size: 9px; }
+  .section-title { font-size: 14px; margin-bottom: 8px; padding-bottom: 6px; }
+  .recipe-card { break-inside: avoid; margin-bottom: 8px; }
+  .recipe-name { font-size: 13px; }
+  .recipe-header { padding: 10px 14px; }
+  .ing-list li, .inst-list li { font-size: 11px; padding: 2px 0; }
+  .inst-list li { padding-left: 20px; }
+  .prep-note { font-size: 10px; padding: 6px 14px; }
+  .recipes-grid { gap: 10px; margin-bottom: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ MEAL DATABASE ═══════════════════
+  Add all 14 meals here. Each week, make sure this matches
+  whatever meals you put in the selector page.
+══════════════════════════════════════════════════════ -->
+<script>
+const MEAL_DB = {
+  "Chicken Shawarma Bowls": {
+    emoji: "🥙", time: 45, skill: "Medium", sides: "Pita Bread",
+    prepNote: "Marinate chicken in spices and olive oil the night before for deeper flavor.",
+    ingredients: [
+      "2 lbs boneless skinless chicken breasts, sliced thin",
+      "2 tbsp olive oil",
+      "2 tsp paprika, 2 tsp garlic powder, 1 tsp cumin",
+      "1 tsp oregano, 1 tsp salt, ½ tsp pepper, ½ tsp cinnamon",
+      "2 cups jasmine rice",
+      "1 cucumber, diced",
+      "2 Roma tomatoes, diced",
+      "½ small red onion, thinly sliced",
+      "1 cup crumbled feta cheese",
+      "1 package pita bread",
+      "1 cup plain Greek yogurt",
+      "1 tbsp lemon juice, 1 garlic clove minced"
+    ],
+    instructions: [
+      "Cook jasmine rice per package directions (~18 min).",
+      "Toss chicken with olive oil and all seasonings until evenly coated.",
+      "Heat large skillet over medium-high. Cook chicken in batches 4–5 min/side until 165°F.",
+      "Dice cucumber, tomato, slice onion.",
+      "Mix yogurt, lemon juice, garlic, olive oil, and salt for sauce.",
+      "Warm pita in a dry skillet 1–2 min.",
+      "Assemble bowls with rice, chicken, vegetables, feta, and yogurt sauce."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["2 lbs boneless skinless chicken breasts"],
+      "Produce": ["1 cucumber", "2 Roma tomatoes", "1 small red onion", "1 lemon", "1 garlic bulb"],
+      "Dairy & Eggs": ["1 cup crumbled feta cheese", "1 cup plain Greek yogurt"],
+      "Grains & Bread": ["2 cups jasmine rice", "1 package pita bread"],
+      "Pantry": ["Olive oil", "Paprika", "Garlic powder", "Cumin", "Oregano", "Cinnamon", "Salt & pepper"]
+    }
+  },
+  "Mediterranean Chicken Flatbreads": {
+    emoji: "🫓", time: 40, skill: "Easy", sides: "Side Salad",
+    prepNote: "Cook and slice chicken ahead; refrigerate up to 1 day.",
+    ingredients: [
+      "2 lbs boneless skinless chicken breasts",
+      "1 tbsp olive oil",
+      "1 tsp garlic powder, 1 tsp oregano, 1 tsp paprika, 1 tsp salt, ½ tsp pepper",
+      "4 naan flatbreads",
+      "1 cup hummus",
+      "1 cucumber, diced",
+      "1 cup cherry tomatoes, halved",
+      "½ cup crumbled feta",
+      "¼ small red onion, sliced",
+      "1 cup shredded mozzarella",
+      "Fresh parsley for garnish"
+    ],
+    instructions: [
+      "Preheat oven to 425°F.",
+      "Season chicken with olive oil, garlic powder, oregano, paprika, salt, and pepper.",
+      "Cook chicken in skillet over medium-high 5–6 min/side until golden and 165°F internally.",
+      "Let chicken rest 5 min, then slice thinly.",
+      "Spread hummus over naan. Top with mozzarella, chicken, cucumber, tomatoes, feta, onion.",
+      "Bake on oven rack or sheet 8–10 min until edges are crisp and cheese melts.",
+      "Garnish with parsley before serving."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["2 lbs boneless skinless chicken breasts"],
+      "Produce": ["1 cucumber", "1 cup cherry tomatoes", "¼ red onion", "Fresh parsley"],
+      "Dairy & Eggs": ["½ cup crumbled feta", "1 cup shredded mozzarella"],
+      "Grains & Bread": ["4 naan flatbreads"],
+      "Pantry": ["1 cup hummus", "Olive oil", "Garlic powder", "Oregano", "Paprika"]
+    }
+  },
+  "Spinach & Cheese Stuffed Shells": {
+    emoji: "🐚", time: 50, skill: "Medium", sides: "Garlic Bread",
+    prepNote: "Fill shells and refrigerate unbaked up to 24 hours ahead.",
+    ingredients: [
+      "1 box jumbo pasta shells",
+      "15 oz ricotta cheese",
+      "2 cups shredded mozzarella, divided",
+      "½ cup grated parmesan",
+      "1 egg",
+      "3 cups fresh spinach, chopped",
+      "1 tsp garlic powder, 1 tsp Italian seasoning, 1 tsp salt, ½ tsp pepper",
+      "1 jar marinara sauce (24 oz)",
+      "Garlic bread for serving"
+    ],
+    instructions: [
+      "Preheat oven to 375°F. Boil salted water.",
+      "Cook shells 1–2 min less than package instructions so they stay firm. Drain and rinse.",
+      "Mix ricotta, 1 cup mozzarella, parmesan, egg, spinach, and seasonings in a large bowl.",
+      "Spread half the marinara in a 9×13 baking dish.",
+      "Fill each shell with cheese mixture; place in dish. Pour remaining sauce over top; sprinkle with remaining mozzarella.",
+      "Cover with foil; bake 20 min. Remove foil; bake another 10 min until bubbly and golden.",
+      "Let rest 5 min before serving with garlic bread."
+    ],
+    groceryContributions: {
+      "Produce": ["3 cups fresh spinach"],
+      "Dairy & Eggs": ["15 oz ricotta cheese", "2 cups shredded mozzarella", "½ cup grated parmesan", "1 egg"],
+      "Grains & Bread": ["1 box jumbo pasta shells", "Garlic bread"],
+      "Pantry": ["1 jar marinara sauce (24 oz)", "Garlic powder", "Italian seasoning"]
+    }
+  },
+  "Buffalo Chicken Rice Bowls": {
+    emoji: "🍚", time: 40, skill: "Easy", sides: "Carrots & Celery",
+    prepNote: "Use mild buffalo sauce for kid-friendly heat.",
+    ingredients: [
+      "2 lbs boneless skinless chicken breasts, cubed",
+      "2 tbsp olive oil",
+      "1 tsp garlic powder, 1 tsp paprika, 1 tsp salt, ½ tsp pepper",
+      "½ cup buffalo sauce",
+      "2 cups jasmine rice",
+      "1 cup shredded cheddar cheese",
+      "2 carrots, sliced",
+      "3 celery stalks, sliced",
+      "Ranch dressing",
+      "Green onions for garnish"
+    ],
+    instructions: [
+      "Start rice per package directions.",
+      "Toss chicken with olive oil, garlic powder, paprika, salt, and pepper.",
+      "Cook chicken in skillet over medium-high 6–8 min, stirring occasionally, until 165°F.",
+      "Reduce heat to low; stir in buffalo sauce until fully coated.",
+      "Prepare carrots and celery.",
+      "Assemble bowls: rice, buffalo chicken, cheddar, carrots, celery, ranch drizzle.",
+      "Garnish with sliced green onions."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["2 lbs boneless skinless chicken breasts"],
+      "Produce": ["2 carrots", "3 celery stalks", "2 green onions"],
+      "Dairy & Eggs": ["1 cup shredded cheddar cheese", "Ranch dressing"],
+      "Grains & Bread": ["2 cups jasmine rice"],
+      "Pantry": ["½ cup buffalo sauce", "Olive oil", "Garlic powder", "Paprika"]
+    }
+  },
+  "Chicken Parmesan": {
+    emoji: "🍝", time: 35, skill: "Medium", sides: "Spaghetti, Salad",
+    prepNote: "Pound and bread chicken the night before; refrigerate uncovered.",
+    ingredients: [
+      "4 chicken breasts, pounded evenly",
+      "1 cup breadcrumbs",
+      "½ cup grated parmesan",
+      "1 egg",
+      "2 cups marinara sauce",
+      "1 cup shredded mozzarella",
+      "12 oz spaghetti",
+      "Olive oil, salt & pepper"
+    ],
+    instructions: [
+      "Preheat oven to 375°F. Bring salted water to a boil and cook spaghetti 8–10 min.",
+      "Beat egg in one bowl. Mix breadcrumbs + parmesan in another.",
+      "Season chicken. Dip in egg, then coat in breadcrumb mixture.",
+      "Heat 2–3 tbsp oil in skillet over medium heat. Cook chicken 4–5 min/side until golden.",
+      "Transfer to baking dish, add marinara and mozzarella.",
+      "Bake 10–15 min until cheese melts and chicken reaches 165°F.",
+      "Serve over pasta with salad."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["4 chicken breasts"],
+      "Dairy & Eggs": ["½ cup grated parmesan", "1 cup shredded mozzarella", "1 egg"],
+      "Grains & Bread": ["12 oz spaghetti"],
+      "Pantry": ["1 cup breadcrumbs", "2 cups marinara sauce", "Olive oil"]
+    }
+  },
+  "Shrimp Fried Rice": {
+    emoji: "🍳", time: 20, skill: "Easy", sides: "Broccoli",
+    prepNote: "Cook rice a day ahead; cold rice fries best.",
+    ingredients: [
+      "1 lb shrimp, peeled & deveined",
+      "3 cups cold cooked rice",
+      "2 cups mixed vegetables (frozen OK)",
+      "2 eggs",
+      "3 tbsp soy sauce",
+      "1 tbsp oil",
+      "2 cloves garlic"
+    ],
+    instructions: [
+      "Pat shrimp dry. Heat pan over medium-high with oil.",
+      "Cook shrimp 2–3 min/side until pink. Remove.",
+      "Lower heat to medium. Scramble eggs 1–2 min, remove.",
+      "Cook veggies 3–4 min, add garlic 30 sec.",
+      "Add rice, press into pan, let sit 1–2 min, then stir.",
+      "Add shrimp, eggs, soy sauce. Stir-fry 2–3 min and serve."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["1 lb shrimp, peeled & deveined"],
+      "Produce": ["2 cloves garlic", "2 cups mixed vegetables"],
+      "Dairy & Eggs": ["2 eggs"],
+      "Grains & Bread": ["3 cups rice (cook ahead)"],
+      "Pantry": ["3 tbsp soy sauce", "Oil"]
+    }
+  },
+  "Chicken Teriyaki Bowls": {
+    emoji: "🥢", time: 25, skill: "Easy", sides: "Broccoli, Cucumber",
+    prepNote: "Cook extra rice for leftovers.",
+    ingredients: [
+      "4 chicken breasts",
+      "2 cups rice",
+      "2 cups broccoli florets",
+      "⅓ cup teriyaki sauce",
+      "1 tbsp oil"
+    ],
+    instructions: [
+      "Cook rice per package directions.",
+      "Heat oil in skillet over medium-high.",
+      "Cook chicken 4–5 min undisturbed, flip and cook 3–4 min.",
+      "Reduce heat, add teriyaki sauce, simmer 2–3 min until thickened.",
+      "Steam broccoli 4–5 min.",
+      "Serve over rice."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["4 chicken breasts"],
+      "Produce": ["2 cups broccoli florets"],
+      "Grains & Bread": ["2 cups rice"],
+      "Pantry": ["⅓ cup teriyaki sauce", "Oil"]
+    }
+  },
+  "Bang Bang Shrimp Bowls": {
+    emoji: "🌶", time: 20, skill: "Easy", sides: "Slaw",
+    prepNote: "Mix bang bang sauce up to 3 days ahead.",
+    ingredients: [
+      "1 lb shrimp, peeled & deveined",
+      "2 cups rice",
+      "½ cup mayonnaise",
+      "2 tbsp sweet chili sauce",
+      "1 tbsp sriracha",
+      "2 cups coleslaw mix",
+      "Oil"
+    ],
+    instructions: [
+      "Cook rice per package directions.",
+      "Mix mayo, sweet chili sauce, and sriracha for bang bang sauce.",
+      "Heat pan over medium-high with oil.",
+      "Cook shrimp 2–3 min/side until opaque.",
+      "Toss shrimp immediately in sauce.",
+      "Serve over rice with slaw on side."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["1 lb shrimp, peeled & deveined"],
+      "Produce": ["2 cups coleslaw mix"],
+      "Grains & Bread": ["2 cups rice"],
+      "Pantry": ["½ cup mayonnaise", "2 tbsp sweet chili sauce", "1 tbsp sriracha", "Oil"]
+    }
+  },
+  "BBQ Chicken Sandwiches": {
+    emoji: "🥪", time: 35, skill: "Easy", sides: "Coleslaw, Potatoes",
+    prepNote: "Use rotisserie chicken to cut time in half.",
+    ingredients: [
+      "4 chicken breasts",
+      "½ cup BBQ sauce",
+      "4 sandwich buns",
+      "2 cups coleslaw mix",
+      "3–4 medium potatoes",
+      "Olive oil, salt"
+    ],
+    instructions: [
+      "Preheat oven to 400°F.",
+      "Cut potatoes, toss with oil and salt, roast 25 min.",
+      "Heat oil in skillet over medium heat.",
+      "Cook chicken 6–7 min/side until 165°F.",
+      "Rest 5 min, shred, mix with BBQ sauce.",
+      "Assemble sandwiches with slaw."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["4 chicken breasts"],
+      "Produce": ["3–4 medium potatoes", "2 cups coleslaw mix"],
+      "Grains & Bread": ["4 sandwich buns"],
+      "Pantry": ["½ cup BBQ sauce", "Olive oil"]
+    }
+  },
+  "Steakhouse Burgers": {
+    emoji: "🍔", time: 20, skill: "Easy", sides: "Potatoes, Pickles",
+    prepNote: "Form patties and season the morning of; refrigerate.",
+    ingredients: [
+      "1.5 lbs ground beef (80/20)",
+      "4 burger buns",
+      "4 cheese slices",
+      "Lettuce, tomato",
+      "Condiments of choice",
+      "3–4 medium potatoes (for roasting)"
+    ],
+    instructions: [
+      "Form patties, season generously both sides.",
+      "Grill or pan over medium-high. Cook 4–5 min — do not press.",
+      "Flip, cook 3–4 min. Add cheese last minute.",
+      "Rest 2–3 min.",
+      "Assemble and serve with roasted potatoes."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["1.5 lbs ground beef (80/20)"],
+      "Produce": ["Lettuce", "1 tomato", "3–4 medium potatoes"],
+      "Dairy & Eggs": ["4 slices cheese"],
+      "Grains & Bread": ["4 burger buns"],
+      "Pantry": ["Condiments"]
+    }
+  },
+  "Shrimp Tacos": {
+    emoji: "🌮", time: 20, skill: "Easy", sides: "Lime Rice, Slaw",
+    prepNote: "Slaw and lime crema can be made hours ahead.",
+    ingredients: [
+      "1 lb shrimp, peeled & deveined",
+      "8–10 small tortillas",
+      "2 cups coleslaw mix",
+      "½ cup yogurt or sour cream",
+      "1 tbsp lime juice",
+      "Oil, salt"
+    ],
+    instructions: [
+      "Pat shrimp dry, season lightly.",
+      "Heat pan over medium-high with oil.",
+      "Cook shrimp 2 min, flip, cook 1–2 min until opaque.",
+      "Mix yogurt, lime juice, and pinch of salt for crema.",
+      "Warm tortillas 30 sec/side.",
+      "Assemble tacos with shrimp, slaw, and crema."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["1 lb shrimp, peeled & deveined"],
+      "Produce": ["2 cups coleslaw mix", "1 lime"],
+      "Dairy & Eggs": ["½ cup yogurt or sour cream"],
+      "Grains & Bread": ["8–10 small tortillas"],
+      "Pantry": ["Oil"]
+    }
+  },
+  "Sheet Pan Salmon": {
+    emoji: "🐟", time: 25, skill: "Easy", sides: "Roasted Veggies",
+    prepNote: "Season salmon up to 2 hours ahead; keep refrigerated.",
+    ingredients: [
+      "4–5 salmon fillets (about 2 lbs)",
+      "2 tbsp olive oil",
+      "1 tsp garlic powder, 1 tsp paprika, salt & pepper",
+      "1 lemon, sliced",
+      "2 cups broccoli florets",
+      "1 cup cherry tomatoes",
+      "Fresh parsley for garnish"
+    ],
+    instructions: [
+      "Preheat oven to 400°F. Line a large sheet pan with foil.",
+      "Toss broccoli and tomatoes with olive oil, salt, and pepper. Spread on pan.",
+      "Roast veggies 10 min.",
+      "Season salmon with garlic powder, paprika, salt, pepper, and a drizzle of olive oil.",
+      "Push veggies to sides, place salmon on pan. Top with lemon slices.",
+      "Roast 12–15 min until salmon flakes easily.",
+      "Garnish with parsley and serve directly from pan."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["2 lbs salmon fillets"],
+      "Produce": ["2 cups broccoli florets", "1 cup cherry tomatoes", "1 lemon", "Fresh parsley"],
+      "Pantry": ["Olive oil", "Garlic powder", "Paprika"]
+    }
+  },
+  "Beef Taco Bowls": {
+    emoji: "🫙", time: 30, skill: "Easy", sides: "Rice, Sour Cream",
+    prepNote: "Seasoned beef keeps well — make a double batch.",
+    ingredients: [
+      "1.5 lbs ground beef",
+      "2 cups rice",
+      "1 packet taco seasoning (or 2 tsp cumin, 1 tsp chili powder, 1 tsp garlic powder)",
+      "½ cup water",
+      "1 cup shredded cheddar cheese",
+      "½ cup sour cream",
+      "1 cup salsa",
+      "1 cup shredded lettuce",
+      "1 avocado, diced"
+    ],
+    instructions: [
+      "Cook rice per package directions.",
+      "Brown ground beef in skillet over medium-high, breaking into crumbles, 5–7 min.",
+      "Drain excess fat. Add taco seasoning and ½ cup water; simmer 3–4 min.",
+      "Assemble bowls: rice, seasoned beef, cheese, lettuce, salsa, sour cream.",
+      "Top with diced avocado."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["1.5 lbs ground beef"],
+      "Produce": ["Shredded lettuce", "1 avocado"],
+      "Dairy & Eggs": ["1 cup shredded cheddar cheese", "½ cup sour cream"],
+      "Grains & Bread": ["2 cups rice"],
+      "Pantry": ["Taco seasoning", "1 cup salsa"]
+    }
+  },
+  "One-Pan Lemon Chicken Orzo": {
+    emoji: "🍋", time: 35, skill: "Medium", sides: "Side Salad",
+    prepNote: "Use low-sodium broth to control saltiness.",
+    ingredients: [
+      "4 chicken breasts",
+      "1.5 cups orzo pasta",
+      "3 cups chicken broth",
+      "1 lemon (juice + zest)",
+      "3 cloves garlic, minced",
+      "1 cup cherry tomatoes",
+      "2 cups fresh spinach",
+      "½ cup grated parmesan",
+      "2 tbsp olive oil",
+      "1 tsp oregano, salt & pepper"
+    ],
+    instructions: [
+      "Season chicken with salt, pepper, and oregano.",
+      "Heat olive oil in large oven-safe skillet over medium-high. Sear chicken 4–5 min/side until golden. Remove.",
+      "Add garlic; sauté 30 sec. Add orzo, toast 1–2 min.",
+      "Pour in broth and lemon juice; bring to simmer.",
+      "Nestle chicken back in. Cover and cook 12–15 min until orzo is tender.",
+      "Stir in cherry tomatoes, spinach, lemon zest, and parmesan until spinach wilts.",
+      "Serve directly from pan."
+    ],
+    groceryContributions: {
+      "Meat & Seafood": ["4 chicken breasts"],
+      "Produce": ["1 lemon", "3 cloves garlic", "1 cup cherry tomatoes", "2 cups fresh spinach"],
+      "Dairy & Eggs": ["½ cup grated parmesan"],
+      "Grains & Bread": ["1.5 cups orzo pasta"],
+      "Pantry": ["3 cups chicken broth", "Olive oil", "Oregano"]
+    }
+  }
+};
+
+// ── CATEGORY DISPLAY ORDER & ICONS ──
+const CAT_META = {
+  "Meat & Seafood":  { icon: "🥩", order: 1 },
+  "Produce":         { icon: "🥦", order: 2 },
+  "Dairy & Eggs":    { icon: "🧀", order: 3 },
+  "Grains & Bread":  { icon: "🍞", order: 4 },
+  "Pantry":          { icon: "🫙", order: 5 }
+};
+</script>
+
+<!-- ═══════════════════ PAGE DATA ═══════════════════
+  This block is what you'd auto-populate from the
+  Google Sheet submission. For the MVP, paste the
+  tester's selections here each week.
+══════════════════════════════════════════════════ -->
+<script>
+const DEFAULT_SCHEDULE = '{"Mon":"Chicken Parmesan","Tue":"Buffalo Chicken Rice Bowls","Wed":"Chicken Shawarma Bowls","Thu":"Sheet Pan Salmon","Fri":"Shrimp Fried Rice","Sat":"Steakhouse Burgers","Sun":"Shrimp Tacos"}';
+
+const params = new URLSearchParams(window.location.search);
+
+let _schedule;
+try {
+  _schedule = JSON.parse(params.get('schedule') || DEFAULT_SCHEDULE);
+} catch(e) {
+  _schedule = JSON.parse(DEFAULT_SCHEDULE);
+}
+
+const PLAN = {
+  name:     params.get('name')   || 'there',
+  week:     params.get('week')   || 'Week of May 11',
+  family:   params.get('family') || 'Family of 5 · Easy Weeknight Meals',
+  schedule: _schedule
+};
+</script>
+
+<!-- ════════════════════════════════════════════════ -->
+
+<header>
+  <div class="logo"><div class="logo-dot"></div> Dinner Buddy</div>
+  <div class="meta" id="header-meta"></div>
+</header>
+
+<div id="app"></div>
+
+<script>
+const DAYS_ORDER = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function buildPage() {
+  document.getElementById('header-meta').innerHTML = `${PLAN.week}<br>${PLAN.family}`;
+
+  const meals = DAYS_ORDER.map(d => ({ day: d, meal: PLAN.schedule[d] })).filter(x => x.meal);
+  const app = document.getElementById('app');
+
+  // ── WEEK STRIP ──
+  const strip = document.createElement('div');
+  strip.className = 'week-strip';
+  meals.forEach(({ day, meal }) => {
+    const db = MEAL_DB[meal] || {};
+    const shortName = meal.split(' ').slice(0, 3).join(' ');
+    strip.innerHTML += `
+      <div class="day-block">
+        <div class="day-name">${day}</div>
+        <div class="day-emoji">${db.emoji || '🍽'}</div>
+        <div class="day-meal">${shortName}</div>
+      </div>`;
+  });
+  app.appendChild(strip);
+
+  // ── ACTIONS ──
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  actions.innerHTML = `
+    <button class="action-btn primary" onclick="window.print()">Print / Save PDF</button>
+    <button class="action-btn" onclick="resetChecks()">Reset grocery checks</button>`;
+  app.appendChild(actions);
+
+  // ── GROCERY LIST (first) ──
+  const groceryTitle = document.createElement('h2');
+  groceryTitle.className = 'section-title';
+  groceryTitle.innerHTML = 'Consolidated <em>grocery list</em>';
+  app.appendChild(groceryTitle);
+
+  const groceryIntro = document.createElement('p');
+  groceryIntro.className = 'grocery-intro';
+  groceryIntro.textContent = `Everything you need for all 7 meals · ${PLAN.family} · Check off items you already have`;
+  app.appendChild(groceryIntro);
+
+  // merge all grocery contributions
+  const merged = {};
+  meals.forEach(({ meal }) => {
+    const db = MEAL_DB[meal];
+    if (!db || !db.groceryContributions) return;
+    Object.entries(db.groceryContributions).forEach(([cat, items]) => {
+      if (!merged[cat]) merged[cat] = new Set();
+      items.forEach(item => merged[cat].add(item));
+    });
+  });
+
+  const grocerySection = document.createElement('div');
+  grocerySection.className = 'grocery-section';
+  const groceryGrid = document.createElement('div');
+  groceryGrid.className = 'grocery-grid';
+
+  const sortedCats = Object.keys(merged).sort((a, b) => {
+    const oa = CAT_META[a] ? CAT_META[a].order : 99;
+    const ob = CAT_META[b] ? CAT_META[b].order : 99;
+    return oa - ob;
+  });
+
+  sortedCats.forEach(cat => {
+    const items = [...merged[cat]];
+    const meta = CAT_META[cat] || { icon: '📦' };
+    const catDiv = document.createElement('div');
+    catDiv.className = 'grocery-cat';
+    catDiv.innerHTML = `
+      <div class="grocery-cat-header">
+        <span class="grocery-cat-icon">${meta.icon}</span>
+        <span class="grocery-cat-name">${cat}</span>
+        <span class="grocery-cat-count">${items.length} items</span>
+      </div>
+      <div class="grocery-items">
+        ${items.map((item, i) => `
+          <div class="grocery-item" onclick="toggleCheck(this)" data-id="${cat}-${i}">
+            <div class="gi-check">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span class="gi-name">${item}</span>
+          </div>`).join('')}
+      </div>`;
+    groceryGrid.appendChild(catDiv);
+  });
+
+  grocerySection.appendChild(groceryGrid);
+  app.appendChild(grocerySection);
+
+  // ── RECIPES (after grocery list) ──
+  const recipeTitle = document.createElement('h2');
+  recipeTitle.className = 'section-title';
+  recipeTitle.innerHTML = 'This week\'s <em>recipes</em>';
+  app.appendChild(recipeTitle);
+
+  const recipesGrid = document.createElement('div');
+  recipesGrid.className = 'recipes-grid';
+
+  meals.forEach(({ day, meal }) => {
+    const db = MEAL_DB[meal];
+    if (!db) return;
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = `
+      <div class="recipe-header">
+        <div class="recipe-emoji">${db.emoji}</div>
+        <div class="recipe-title-block">
+          <div class="recipe-name">${meal}</div>
+          <span class="recipe-day-badge">${day}</span>
+          <div class="recipe-tags">
+            <span class="rtag">${db.time} min</span>
+            <span class="rtag">${db.skill}</span>
+            <span class="rtag">Sides: ${db.sides}</span>
+          </div>
+        </div>
+      </div>
+      <div class="recipe-body">
+        <div class="recipe-ingredients">
+          <div class="col-label">Ingredients</div>
+          <ul class="ing-list">
+            ${db.ingredients.map(i => `<li>${i}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="recipe-instructions">
+          <div class="col-label">Instructions</div>
+          <ol class="inst-list">
+            ${db.instructions.map(s => `<li>${s}</li>`).join('')}
+          </ol>
+        </div>
+      </div>
+      <div class="prep-note">Prep tip: ${db.prepNote}</div>`;
+    recipesGrid.appendChild(card);
+  });
+  app.appendChild(recipesGrid);
+
+  loadChecks();
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  saveChecks();
+}
+
+function saveChecks() {
+  const checked = [...document.querySelectorAll('.grocery-item.checked')].map(el => el.dataset.id);
+  try { localStorage.setItem('db-checks-' + PLAN.week, JSON.stringify(checked)); } catch(e) {}
+}
+
+function loadChecks() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('db-checks-' + PLAN.week) || '[]');
+    saved.forEach(id => {
+      const el = document.querySelector(`[data-id="${id}"]`);
+      if (el) el.classList.add('checked');
+    });
+  } catch(e) {}
+}
+
+function resetChecks() {
+  document.querySelectorAll('.grocery-item.checked').forEach(el => el.classList.remove('checked'));
+  try { localStorage.removeItem('db-checks-' + PLAN.week); } catch(e) {}
+}
+
+buildPage();
+</script>
+</body>
+</html>
