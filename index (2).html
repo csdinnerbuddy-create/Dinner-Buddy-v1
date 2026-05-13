@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinner Buddy — Pick Your Week</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ─── RESET ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ─── TOKENS ─── */
+  :root {
+    --cream: #FAF8F3;
+    --ink: #1C1A16;
+    --ink-light: #6B6760;
+    --ink-faint: #C4C0B8;
+    --green: #2A7A5A;
+    --green-light: #E8F4EE;
+    --green-mid: #4BAF84;
+    --amber: #C9691A;
+    --amber-light: #FDF1E6;
+    --border: rgba(28,26,22,0.12);
+    --border-strong: rgba(28,26,22,0.22);
+    --radius: 12px;
+    --radius-sm: 7px;
+  }
+
+  /* ─── BASE ─── */
+  html { background: var(--cream); color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.5; }
+  body { min-height: 100vh; padding-bottom: 120px; }
+
+  /* ─── HEADER ─── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--cream); z-index: 100;
+  }
+  .logo { font-family: 'Lora', serif; font-size: 18px; font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .week-label { font-size: 13px; color: var(--ink-light); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .progress-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: white; border: 1px solid var(--border); border-radius: 30px;
+    padding: 6px 14px; font-size: 13px;
+  }
+  .pip-track { width: 80px; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .pip-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.35s ease; width: 0%; }
+  .pip-count { font-weight: 500; color: var(--ink); }
+  .pip-count span { color: var(--ink-light); font-weight: 400; }
+
+  /* ─── HERO ─── */
+  .hero { padding: 36px 32px 20px; border-bottom: 1px solid var(--border); }
+  .hero h1 { font-family: 'Lora', serif; font-size: 28px; font-weight: 400; margin-bottom: 6px; }
+  .hero h1 em { font-style: italic; color: var(--green); }
+  .hero p { font-size: 14px; color: var(--ink-light); }
+
+  /* ─── FILTERS ─── */
+  .filter-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 16px 32px; border-bottom: 1px solid var(--border); }
+  .filter-label { font-size: 12px; color: var(--ink-light); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px; }
+  .fb { padding: 5px 13px; font-size: 12px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 20px; background: transparent; cursor: pointer; color: var(--ink-light); transition: all 0.15s; }
+  .fb:hover { border-color: var(--border-strong); color: var(--ink); }
+  .fb.on { background: var(--ink); border-color: var(--ink); color: white; }
+
+  /* ─── GRID ─── */
+  .grid-wrap { padding: 24px 32px; }
+  .meal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+
+  /* ─── MEAL CARD ─── */
+  .card {
+    background: white; border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; transition: border-color 0.15s, transform 0.1s;
+    user-select: none; position: relative;
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card:active { transform: scale(0.98); }
+  .card.sel { border: 2px solid var(--green); }
+  .card.maxed:not(.sel) { opacity: 0.45; cursor: default; }
+
+  .card-emoji { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 34px; background: var(--cream); position: relative; }
+  .check-badge {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--green); display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .check-badge svg { width: 12px; height: 12px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .card.sel .check-badge { opacity: 1; }
+
+  .card-body { padding: 10px 12px 12px; }
+  .card-name { font-size: 13px; font-weight: 500; color: var(--ink); line-height: 1.35; margin-bottom: 7px; }
+  .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+  .t-time { background: #F2F0EB; color: var(--ink-light); }
+  .t-easy { background: var(--green-light); color: var(--green); }
+  .t-med { background: var(--amber-light); color: var(--amber); }
+  .card-sides { font-size: 11px; color: var(--ink-faint); }
+
+  /* ─── DAY PICKER (shown when selected) ─── */
+  .day-row { display: flex; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .day-btn {
+    flex: 1; padding: 4px 0; font-size: 10px; font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border); border-radius: 5px; background: transparent;
+    cursor: pointer; color: var(--ink-light); transition: all 0.1s;
+  }
+  .day-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+  .day-btn.mine { background: var(--green); border-color: var(--green); color: white; }
+  .day-btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* ─── STICKY FOOTER ─── */
+  .sticky-footer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; border-top: 1px solid var(--border);
+    padding: 14px 32px; display: flex; align-items: center; gap: 12px; z-index: 200;
+  }
+  .day-schedule { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; align-items: center; }
+  .sched-empty { font-size: 13px; color: var(--ink-faint); }
+  .sched-pill { font-size: 12px; padding: 4px 10px; border-radius: 20px; background: var(--green-light); color: var(--green); white-space: nowrap; }
+  .sched-pill strong { font-weight: 500; }
+
+  .submit-btn {
+    padding: 11px 24px; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    background: var(--green); color: white; border: none; border-radius: var(--radius-sm);
+    cursor: pointer; white-space: nowrap; transition: background 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .submit-btn:hover:not(:disabled) { background: #1f5e43; }
+  .submit-btn:disabled { background: var(--border); color: var(--ink-faint); cursor: default; }
+  .submit-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ─── TESTER NAME MODAL ─── */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(28,26,22,0.5); z-index: 500;
+    align-items: center; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: white; border-radius: var(--radius); padding: 28px 28px 24px;
+    width: 360px; max-width: 90vw;
+  }
+  .modal h2 { font-family: 'Lora', serif; font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--ink-light); margin-bottom: 18px; }
+  .modal input {
+    width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border); border-radius: var(--radius-sm); outline: none;
+    color: var(--ink); background: var(--cream); margin-bottom: 14px;
+  }
+  .modal input:focus { border-color: var(--green); }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-cancel { padding: 9px 18px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--ink-light); }
+  .modal-confirm { padding: 9px 18px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+
+  /* ─── SUCCESS STATE ─── */
+  .success-screen {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 60vh; padding: 40px; text-align: center;
+  }
+  .success-screen.show { display: flex; }
+  .success-icon { font-size: 52px; margin-bottom: 16px; }
+  .success-screen h2 { font-family: 'Lora', serif; font-size: 26px; font-weight: 400; margin-bottom: 8px; }
+  .success-screen p { font-size: 14px; color: var(--ink-light); max-width: 360px; }
+
+  /* ─── SETUP NOTICE ─── */
+  .setup-banner {
+    margin: 16px 32px 0; padding: 12px 16px;
+    background: var(--amber-light); border: 1px solid rgba(201,105,26,0.2); border-radius: var(--radius-sm);
+    font-size: 13px; color: var(--amber); display: flex; align-items: flex-start; gap: 10px;
+  }
+  .setup-banner strong { font-weight: 500; }
+  .setup-banner.hidden { display: none; }
+
+  @media (max-width: 600px) {
+    header { padding: 14px 16px; }
+    .hero, .filter-bar, .grid-wrap { padding-left: 16px; padding-right: 16px; }
+    .hero h1 { font-size: 22px; }
+    .sticky-footer { padding: 12px 16px; }
+    .pip-track { width: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     CONFIGURATION — UPDATE THIS EACH WEEK
+     Replace meals below with your 14 AI-generated picks.
+     Fields: id, name, emoji, time (minutes), skill ("Easy" or "Medium"), tags (array), sides
+═══════════════════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  weekLabel: "Week of May 11",
+  familyLabel: "Family of 5 · Easy Weeknight Meals",
+
+  // ── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW ──
+  // (Leave as "" until you've set up the Google Sheet — see SETUP.md)
+  sheetURL: "https://script.google.com/macros/s/AKfycbzNkxit6Ox3WjtIKOIR8YeP-1HS6osPMX2qyYjKEFi8I9k8ungMhmYe2zP0Nlh-KYaR/exec",
+
+  meals: [
+    { id:1,  name:"Chicken Shawarma Bowls",          emoji:"🥙", time:45, skill:"Medium", tags:["chicken"],       sides:"Pita Bread" },
+    { id:2,  name:"Mediterranean Chicken Flatbreads", emoji:"🫓", time:40, skill:"Easy",   tags:["chicken"],       sides:"Side Salad" },
+    { id:3,  name:"Spinach & Cheese Stuffed Shells",  emoji:"🐚", time:50, skill:"Medium", tags:["veggie"],        sides:"Garlic Bread" },
+    { id:4,  name:"Buffalo Chicken Rice Bowls",       emoji:"🍚", time:40, skill:"Easy",   tags:["chicken"],       sides:"Carrots & Celery" },
+    { id:5,  name:"Chicken Parmesan",                 emoji:"🍝", time:35, skill:"Medium", tags:["chicken"],       sides:"Spaghetti, Salad" },
+    { id:6,  name:"Shrimp Fried Rice",                emoji:"🍳", time:20, skill:"Easy",   tags:["seafood"],       sides:"Broccoli" },
+    { id:7,  name:"Chicken Teriyaki Bowls",           emoji:"🥢", time:25, skill:"Easy",   tags:["chicken"],       sides:"Broccoli" },
+    { id:8,  name:"Bang Bang Shrimp Bowls",           emoji:"🌶", time:20, skill:"Easy",   tags:["seafood"],       sides:"Slaw" },
+    { id:9,  name:"BBQ Chicken Sandwiches",           emoji:"🥪", time:35, skill:"Easy",   tags:["chicken"],       sides:"Coleslaw, Potatoes" },
+    { id:10, name:"Steakhouse Burgers",               emoji:"🍔", time:20, skill:"Easy",   tags:["beef"],          sides:"Potatoes, Pickles" },
+    { id:11, name:"Shrimp Tacos",                     emoji:"🌮", time:20, skill:"Easy",   tags:["seafood"],       sides:"Lime Rice, Slaw" },
+    { id:12, name:"Sheet Pan Salmon",                 emoji:"🐟", time:25, skill:"Easy",   tags:["seafood"],       sides:"Roasted Veggies" },
+    { id:13, name:"Beef Taco Bowls",                  emoji:"🫙", time:30, skill:"Easy",   tags:["beef"],          sides:"Rice, Sour Cream" },
+    { id:14, name:"One-Pan Lemon Chicken Orzo",       emoji:"🍋", time:35, skill:"Medium", tags:["chicken"],       sides:"Side Salad" }
+  ]
+};
+</script>
+<!-- ═══════════════════════════════════════════════════ -->
+
+
+<!-- SETUP BANNER (only shows if sheetURL is empty) -->
+<div class="setup-banner hidden" id="setup-banner">
+  <span>⚠</span>
+  <span><strong>Setup needed:</strong> Open this file in a text editor and paste your Google Apps Script URL into <code>sheetURL</code> at the top. See the included SETUP instructions.</span>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><div class="logo-dot"></div> Dinner Buddy</div>
+  <div class="header-right">
+    <div class="week-label" id="week-label"></div>
+    <div class="progress-pill">
+      <div class="pip-track"><div class="pip-fill" id="pip-fill"></div></div>
+      <div class="pip-count"><span id="sel-n">0</span><span> / 7</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero" id="main-hero">
+  <h1>Pick your <em>7 dinners</em> for the week</h1>
+  <p id="hero-sub"></p>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-bar">
+  <span class="filter-label">Filter</span>
+  <button class="fb on" onclick="setFilter('all',this)">All 14</button>
+  <button class="fb" onclick="setFilter('chicken',this)">Chicken</button>
+  <button class="fb" onclick="setFilter('beef',this)">Beef</button>
+  <button class="fb" onclick="setFilter('seafood',this)">Seafood</button>
+  <button class="fb" onclick="setFilter('veggie',this)">Veggie</button>
+  <button class="fb" onclick="setFilter('under30',this)">Under 30 min</button>
+  <button class="fb" onclick="setFilter('easy',this)">Easy only</button>
+</div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="meal-grid" id="meal-grid"></div>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎉</div>
+  <h2>You're all set!</h2>
+  <p id="success-msg">Your meal selections have been sent. Your personalized plan will be ready soon.</p>
+</div>
+
+<!-- STICKY FOOTER -->
+<div class="sticky-footer" id="sticky-footer">
+  <div class="day-schedule" id="day-schedule">
+    <span class="sched-empty">Select 7 meals above to build your week</span>
+  </div>
+  <button class="submit-btn" id="submit-btn" disabled onclick="openModal()">
+    Build my plan
+    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<!-- NAME MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h2>Almost there!</h2>
+    <p>Enter your first name so we know whose plan this is.</p>
+    <input type="text" id="tester-name" placeholder="First name" maxlength="40" onkeydown="if(event.key==='Enter')confirmSubmit()">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Back</button>
+      <button class="modal-confirm" onclick="confirmSubmit()">Send my selections</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ─── STATE ───
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+let selected = new Set();
+let dayMap = {};
+let activeFilter = 'all';
+const MAX = 7;
+
+// ─── INIT ───
+document.getElementById('week-label').textContent = CONFIG.weekLabel;
+document.getElementById('hero-sub').textContent = CONFIG.familyLabel + ' · ' + CONFIG.weekLabel;
+if (!CONFIG.sheetURL) document.getElementById('setup-banner').classList.remove('hidden');
+
+// ─── FILTER ───
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderGrid();
+}
+
+function matches(m) {
+  if (activeFilter === 'all') return true;
+  if (activeFilter === 'under30') return m.time <= 30;
+  if (activeFilter === 'easy') return m.skill === 'Easy';
+  return m.tags.includes(activeFilter);
+}
+
+// ─── RENDER ───
+function renderGrid() {
+  const grid = document.getElementById('meal-grid');
+  grid.innerHTML = '';
+  const maxed = selected.size >= MAX;
+
+  CONFIG.meals.forEach(m => {
+    if (!matches(m)) return;
+    const isSel = selected.has(m.id);
+    const card = document.createElement('div');
+    card.className = 'card' + (isSel ? ' sel' : '') + (!isSel && maxed ? ' maxed' : '');
+    card.onclick = () => { if (!isSel && maxed) return; toggleMeal(m.id); };
+
+    const assignedDay = Object.entries(dayMap).find(([d, id]) => id === m.id);
+
+    const dayRowHTML = isSel ? `
+      <div class="day-row" onclick="event.stopPropagation()">
+        ${DAYS.map(d => {
+          const takenByOther = dayMap[d] && dayMap[d] !== m.id;
+          const mine = dayMap[d] === m.id;
+          return `<button class="day-btn ${mine ? 'mine' : ''}" ${takenByOther ? 'disabled' : ''} onclick="assignDay('${d}',${m.id})">${d[0]}</button>`;
+        }).join('')}
+      </div>` : '';
+
+    card.innerHTML = `
+      <div class="card-emoji">
+        <span>${m.emoji}</span>
+        <div class="check-badge">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-name">${m.name}</p>
+        <div class="tags">
+          <span class="tag t-time">${m.time} min</span>
+          <span class="tag ${m.skill === 'Easy' ? 't-easy' : 't-med'}">${m.skill}</span>
+        </div>
+        <p class="card-sides">Sides: ${m.sides}</p>
+        ${dayRowHTML}
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  updateProgress();
+  updateFooter();
+}
+
+function toggleMeal(id) {
+  if (selected.has(id)) {
+    selected.delete(id);
+    Object.keys(dayMap).forEach(d => { if (dayMap[d] === id) delete dayMap[d]; });
+  } else {
+    if (selected.size >= MAX) return;
+    selected.add(id);
+  }
+  renderGrid();
+}
+
+function assignDay(day, mealId) {
+  Object.keys(dayMap).forEach(d => { if (dayMap[d] === mealId) delete dayMap[d]; });
+  if (dayMap[day] === mealId) { delete dayMap[day]; }
+  else { dayMap[day] = mealId; }
+  renderGrid();
+}
+
+function updateProgress() {
+  const n = selected.size;
+  document.getElementById('sel-n').textContent = n;
+  document.getElementById('pip-fill').style.width = Math.round((n / MAX) * 100) + '%';
+  document.getElementById('submit-btn').disabled = n < MAX;
+}
+
+function updateFooter() {
+  const el = document.getElementById('day-schedule');
+  const pills = DAYS.map(d => {
+    const id = dayMap[d];
+    if (!id) return '';
+    const m = CONFIG.meals.find(x => x.id === id);
+    const short = m.name.split(' ').slice(0, 3).join(' ');
+    return `<span class="sched-pill"><strong>${d}:</strong> ${short}</span>`;
+  }).filter(Boolean).join('');
+
+  if (pills) { el.innerHTML = pills; }
+  else if (selected.size > 0) { el.innerHTML = `<span class="sched-empty">${selected.size}/7 selected — tap day letters on each card to schedule</span>`; }
+  else { el.innerHTML = `<span class="sched-empty">Select 7 meals above to build your week</span>`; }
+}
+
+// ─── MODAL ───
+function openModal() { document.getElementById('modal-bg').classList.add('open'); document.getElementById('tester-name').focus(); }
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+
+// ─── SUBMIT ───
+function confirmSubmit() {
+  const name = document.getElementById('tester-name').value.trim();
+  if (!name) { document.getElementById('tester-name').focus(); return; }
+  closeModal();
+
+  const selections = [...selected].map(id => CONFIG.meals.find(m => m.id === id).name);
+  const scheduleObj = {};
+  DAYS.forEach(d => {
+    const id = dayMap[d];
+    if (id) scheduleObj[d] = CONFIG.meals.find(m => m.id === id).name;
+  });
+  const scheduleStr = DAYS.map(d => {
+    const id = dayMap[d];
+    if (!id) return d + ': (unassigned)';
+    return d + ': ' + CONFIG.meals.find(m => m.id === id).name;
+  }).join(', ');
+
+  // Build plan page URL
+  const planParams = new URLSearchParams({
+    name: name,
+    week: CONFIG.weekLabel,
+    family: CONFIG.familyLabel,
+    schedule: JSON.stringify(scheduleObj)
+  });
+  const planURL = 'plan.html?' + planParams.toString();
+
+  // Send to Google Sheet then redirect
+  const params = new URLSearchParams({
+    name: name,
+    week: CONFIG.weekLabel,
+    meals: selections.join(' | '),
+    schedule: scheduleStr,
+    timestamp: new Date().toISOString()
+  });
+
+  // Show saving state
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  if (CONFIG.sheetURL) {
+    // Image ping — browsers never cancel this during navigation
+    const img = new Image();
+    img.src = CONFIG.sheetURL + '?' + params.toString();
+  }
+
+  // Wait 1.5 seconds then redirect
+  setTimeout(() => {
+    window.location.href = planURL;
+  }, 1500);
+}
+
+// ─── KICK OFF ───
+renderGrid();
+</script>
+
+</body>
+</html>
