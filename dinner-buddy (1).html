@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinner Buddy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #FAF8F3;
+  --ink: #1C1A16;
+  --ink-light: #6B6760;
+  --ink-faint: #C4C0B8;
+  --green: #2A7A5A;
+  --green-light: #E8F4EE;
+  --green-dark: #1f5e43;
+  --amber: #C9691A;
+  --amber-light: #FDF1E6;
+  --border: rgba(28,26,22,0.12);
+  --border-strong: rgba(28,26,22,0.22);
+  --radius: 12px;
+  --radius-sm: 7px;
+}
+html { background: var(--cream); color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6; }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── SHARED HEADER ── */
+.db-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--cream); z-index: 100; }
+.logo { font-family: 'Lora', serif; font-size: 18px; font-weight: 500; color: var(--ink); display: flex; align-items: center; gap: 9px; }
+.logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.header-right { font-size: 13px; color: var(--ink-light); text-align: right; line-height: 1.4; }
+
+/* ── SHARED BUTTONS ── */
+.btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+.btn-primary:hover { background: var(--green-dark); }
+.btn-primary:disabled { background: var(--border); color: var(--ink-faint); cursor: default; }
+
+/* ════════════════════════════════════
+   SCREEN 1 — INTAKE FORM
+════════════════════════════════════ */
+#screen-intake { padding-bottom: 60px; }
+.intake-body { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+.intake-title { font-family: 'Lora', serif; font-size: 26px; font-weight: 400; margin: 28px 0 6px; }
+.intake-title em { font-style: italic; color: var(--green); }
+.intake-sub { font-size: 14px; color: var(--ink-light); margin-bottom: 24px; }
+.progress-wrap { margin-bottom: 24px; }
+.progress-track { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+.progress-label { font-size: 12px; color: var(--ink-light); }
+.i-section { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; }
+.i-section-head { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.i-section-icon { font-size: 17px; }
+.i-section-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-light); }
+.i-field { margin-bottom: 16px; }
+.i-field:last-child { margin-bottom: 0; }
+.i-field label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; color: var(--ink); }
+.i-field .hint { font-size: 12px; color: var(--ink-light); margin-bottom: 7px; display: block; }
+.qnum { font-size: 11px; color: var(--ink-faint); font-weight: 400; margin-left: 3px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input[type=text], select, textarea { width: 100%; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--ink); background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; outline: none; }
+input[type=text]:focus, select:focus, textarea:focus { border-color: var(--green); }
+textarea { resize: vertical; min-height: 68px; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.chip { padding: 5px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; color: var(--ink-light); background: var(--cream); user-select: none; }
+.chip:hover { border-color: var(--border-strong); color: var(--ink); }
+.chip.on { background: var(--green-light); border-color: var(--green); color: var(--green); font-weight: 500; }
+.radio-group { display: flex; flex-direction: column; gap: 7px; margin-top: 5px; }
+.radio-row { display: flex; align-items: flex-start; gap: 9px; font-size: 14px; color: var(--ink); cursor: pointer; }
+.radio-row input[type=radio] { margin-top: 3px; accent-color: var(--green); flex-shrink: 0; }
+.name-box { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; }
+.name-box label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.submit-wrap { margin-top: 20px; }
+.skip-link { text-align: center; margin-top: 14px; font-size: 13px; color: var(--ink-faint); }
+.skip-link a { color: var(--green); text-decoration: none; font-weight: 500; }
+
+/* ════════════════════════════════════
+   SCREEN 2 — BUILDING
+════════════════════════════════════ */
+#screen-building { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+#screen-building.active { display: flex; }
+.building-plate-wrap { position: relative; width: 110px; height: 110px; margin: 0 auto 36px; }
+.building-plate { width: 110px; height: 110px; border-radius: 50%; background: white; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 44px; animation: bpulse 2s ease-in-out infinite; }
+@keyframes bpulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+.sparkle { position: absolute; font-size: 16px; animation: borbit 3s linear infinite; }
+.sparkle:nth-child(2){animation-delay:-1s}
+.sparkle:nth-child(3){animation-delay:-2s}
+@keyframes borbit {
+  0%  {top:0px;  left:50%;transform:translateX(-50%);opacity:1}
+  25% {top:25%;  left:88%;opacity:1}
+  50% {top:78%;  left:50%;transform:translateX(-50%);opacity:0.3}
+  75% {top:25%;  left:5%; opacity:1}
+  100%{top:0px;  left:50%;transform:translateX(-50%);opacity:1}
+}
+.building-title { font-family: 'Lora', serif; font-size: 26px; font-weight: 400; margin-bottom: 8px; }
+.building-title em { font-style: italic; color: var(--green); }
+.building-sub { font-size: 14px; color: var(--ink-light); margin-bottom: 36px; max-width: 340px; }
+.bsteps { display: flex; flex-direction: column; gap: 9px; width: 100%; max-width: 300px; margin-bottom: 40px; }
+.bstep { display: flex; align-items: center; gap: 12px; background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; font-size: 13px; color: var(--ink-light); opacity: 0; transform: translateY(6px); transition: opacity 0.4s, transform 0.4s, border-color 0.3s, color 0.3s; }
+.bstep.vis { opacity: 1; transform: translateY(0); }
+.bstep.done { border-color: var(--green); color: var(--ink); }
+.bstep-icon { font-size: 17px; flex-shrink: 0; }
+.bstep-check { margin-left: auto; width: 17px; height: 17px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; flex-shrink: 0; }
+.bstep.done .bstep-check { opacity: 1; }
+.bstep-check svg { width: 9px; height: 9px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.continue-btn { padding: 12px 32px; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; opacity: 0; transform: translateY(6px); transition: opacity 0.4s, transform 0.4s, background 0.15s; display: flex; align-items: center; gap: 8px; }
+.continue-btn.vis { opacity: 1; transform: translateY(0); }
+.continue-btn:hover { background: var(--green-dark); }
+
+/* ════════════════════════════════════
+   SCREEN 3 — SELECTOR
+════════════════════════════════════ */
+#screen-selector { padding-bottom: 80px; }
+.sel-hero { padding: 28px 24px 18px; border-bottom: 1px solid var(--border); }
+.sel-hero h1 { font-family: 'Lora', serif; font-size: 26px; font-weight: 400; margin-bottom: 4px; }
+.sel-hero h1 em { font-style: italic; color: var(--green); }
+.sel-hero p { font-size: 13px; color: var(--ink-light); }
+.filter-bar { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; padding: 13px 24px; border-bottom: 1px solid var(--border); }
+.filter-label { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 3px; }
+.fb { padding: 4px 11px; font-size: 12px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 20px; background: transparent; cursor: pointer; color: var(--ink-light); }
+.fb:hover { border-color: var(--border-strong); color: var(--ink); }
+.fb.on { background: var(--ink); border-color: var(--ink); color: white; }
+.meal-grid-wrap { padding: 20px 24px; }
+.meal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.mcard { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; cursor: pointer; user-select: none; transition: border-color 0.12s; }
+.mcard:hover { border-color: var(--border-strong); }
+.mcard.sel { border: 2px solid var(--green); }
+.mcard.maxed:not(.sel) { opacity: 0.4; cursor: default; }
+.mcard-emoji { height: 76px; background: var(--cream); display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; }
+.mcard-check { position: absolute; top: 7px; right: 7px; width: 20px; height: 20px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.12s; }
+.mcard-check svg { width: 10px; height: 10px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.mcard.sel .mcard-check { opacity: 1; }
+.mcard-body { padding: 9px 11px 11px; }
+.mcard-name { font-size: 13px; font-weight: 500; color: var(--ink); line-height: 1.3; margin-bottom: 6px; }
+.mcard-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 5px; }
+.mtag { font-size: 11px; padding: 2px 7px; border-radius: 20px; }
+.mtag-time { background: #F2F0EB; color: var(--ink-light); }
+.mtag-easy { background: var(--green-light); color: var(--green); }
+.mtag-med { background: var(--amber-light); color: var(--amber); }
+.mcard-sides { font-size: 11px; color: var(--ink-faint); }
+.day-row { display: flex; gap: 3px; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border); }
+.day-btn { flex: 1; padding: 4px 0; font-size: 10px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: 4px; background: transparent; cursor: pointer; color: var(--ink-light); }
+.day-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.day-btn.mine { background: var(--green); border-color: var(--green); color: white; }
+.day-btn:disabled { opacity: 0.25; cursor: default; }
+.sel-footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 10px; z-index: 200; }
+.sel-pills { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; align-items: center; min-width: 0; }
+.sel-empty { font-size: 13px; color: var(--ink-faint); }
+.sel-pill { font-size: 12px; padding: 3px 9px; border-radius: 20px; background: var(--green-light); color: var(--green); white-space: nowrap; }
+.sel-pill strong { font-weight: 500; }
+.sel-submit { padding: 10px 20px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.sel-submit:hover:not(:disabled) { background: var(--green-dark); }
+.sel-submit:disabled { background: var(--border); color: var(--ink-faint); cursor: default; }
+.sel-submit svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.name-modal-bg { display: none; position: fixed; inset: 0; background: rgba(28,26,22,0.5); z-index: 500; align-items: center; justify-content: center; }
+.name-modal-bg.open { display: flex; }
+.name-modal { background: white; border-radius: var(--radius); padding: 26px 26px 22px; width: 340px; max-width: 90vw; }
+.name-modal h2 { font-family: 'Lora', serif; font-size: 19px; font-weight: 400; margin-bottom: 5px; }
+.name-modal p { font-size: 13px; color: var(--ink-light); margin-bottom: 16px; }
+.name-modal input { width: 100%; padding: 9px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius-sm); outline: none; color: var(--ink); background: var(--cream); margin-bottom: 13px; }
+.name-modal input:focus { border-color: var(--green); }
+.modal-btns { display: flex; gap: 9px; justify-content: flex-end; }
+.modal-cancel { padding: 8px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--ink-light); }
+.modal-confirm { padding: 8px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+.pip-pill { display: flex; align-items: center; gap: 9px; background: white; border: 1px solid var(--border); border-radius: 30px; padding: 5px 12px; font-size: 13px; }
+.pip-track { width: 70px; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.pip-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.3s; width: 0%; }
+
+/* ════════════════════════════════════
+   SCREEN 4 — PLAN
+════════════════════════════════════ */
+#screen-plan { padding-bottom: 40px; }
+.plan-body { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+.plan-week-strip { display: grid; grid-template-columns: repeat(7,1fr); gap: 7px; margin: 24px 0 32px; }
+.plan-day { background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 6px; text-align: center; }
+.plan-day-name { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 4px; }
+.plan-day-emoji { font-size: 20px; margin-bottom: 3px; }
+.plan-day-meal { font-size: 10px; font-weight: 500; color: var(--ink); line-height: 1.3; }
+.plan-section-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 400; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.plan-section-title em { font-style: italic; color: var(--green); }
+.plan-actions { display: flex; gap: 9px; margin-bottom: 28px; }
+.plan-btn { padding: 8px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; cursor: pointer; color: var(--ink-light); }
+.plan-btn:hover { border-color: var(--border-strong); color: var(--ink); }
+.plan-btn.primary { background: var(--green); color: white; border-color: var(--green); }
+.plan-btn.primary:hover { background: var(--green-dark); }
+.grocery-intro { font-size: 13px; color: var(--ink-light); margin-bottom: 16px; }
+.grocery-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(230px,1fr)); gap: 14px; margin-bottom: 40px; }
+.gcat { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.gcat-head { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 7px; }
+.gcat-icon { font-size: 15px; }
+.gcat-name { font-size: 13px; font-weight: 500; }
+.gcat-count { font-size: 11px; color: var(--ink-faint); margin-left: auto; }
+.gcat-items { padding: 4px 0; }
+.gitem { display: flex; align-items: flex-start; gap: 9px; padding: 6px 14px; cursor: pointer; }
+.gitem:hover { background: var(--cream); }
+.gitem.checked { opacity: 0.4; }
+.gitem.checked .gitem-name { text-decoration: line-through; }
+.gcheck { width: 15px; height: 15px; border: 1.5px solid var(--border-strong); border-radius: 3px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+.gitem.checked .gcheck { background: var(--green); border-color: var(--green); }
+.gcheck svg { width: 8px; height: 8px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.gitem.checked .gcheck svg { opacity: 1; }
+.gitem-name { font-size: 13px; color: var(--ink); line-height: 1.4; }
+.recipes-list { display: flex; flex-direction: column; gap: 20px; }
+.recipe-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.recipe-head { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.recipe-emoji { font-size: 30px; flex-shrink: 0; }
+.recipe-info { flex: 1; }
+.recipe-name { font-family: 'Lora', serif; font-size: 17px; font-weight: 500; margin-bottom: 4px; }
+.recipe-day-badge { font-size: 11px; background: var(--green-light); color: var(--green); padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.recipe-tags { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+.rtag { font-size: 11px; padding: 2px 7px; border-radius: 20px; background: #F2F0EB; color: var(--ink-light); }
+.recipe-body { display: grid; grid-template-columns: 1fr 1.6fr; }
+.recipe-ing { padding: 14px 18px; border-right: 1px solid var(--border); }
+.recipe-inst { padding: 14px 18px; }
+.col-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); margin-bottom: 9px; }
+.ing-list { list-style: none; }
+.ing-list li { font-size: 13px; padding: 3px 0; border-bottom: 1px solid var(--border); display: flex; gap: 7px; }
+.ing-list li:last-child { border-bottom: none; }
+.ing-list li::before { content:"·"; color: var(--green); flex-shrink: 0; }
+.inst-list { list-style: none; counter-reset: step; }
+.inst-list li { font-size: 13px; padding: 4px 0 4px 26px; position: relative; border-bottom: 1px solid var(--border); counter-increment: step; }
+.inst-list li:last-child { border-bottom: none; }
+.inst-list li::before { content: counter(step); position: absolute; left: 0; top: 4px; width: 17px; height: 17px; border-radius: 50%; background: var(--green-light); color: var(--green); font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+.prep-note { font-size: 12px; color: var(--ink-light); font-style: italic; padding: 9px 18px; background: var(--cream); border-top: 1px solid var(--border); }
+
+@media (max-width: 600px) {
+  .db-header { padding: 14px 16px; }
+  .sel-hero, .filter-bar, .meal-grid-wrap { padding-left: 16px; padding-right: 16px; }
+  .plan-week-strip { grid-template-columns: repeat(4,1fr); }
+  .recipe-body { grid-template-columns: 1fr; }
+  .recipe-ing { border-right: none; border-bottom: 1px solid var(--border); }
+  .grocery-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .intake-body, .plan-body { padding: 0 14px; }
+}
+@media print {
+  .db-header, .plan-actions, .sel-footer { display: none; }
+  .grocery-grid { grid-template-columns: repeat(3,1fr) !important; gap: 7px; }
+  .gitem { padding: 3px 10px; }
+  .gitem-name { font-size: 11px; }
+  .gcheck { width: 11px; height: 11px; }
+  .gcheck svg { display: none; }
+  .recipe-card { break-inside: avoid; }
+  .plan-week-strip { gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     CONFIG — UPDATE WEEKLY
+═══════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  weekLabel:   "Week of May 11",
+  familyLabel: "Family of 5 · Easy Weeknight Meals",
+
+  // ── YOUR GOOGLE SHEET URLS ──
+  mealSheetURL:   "https://script.google.com/macros/s/AKfycbzNkxit6Ox3WjtIKOIR8YeP-1HS6osPMX2qyYjKEFi8I9k8ungMhmYe2zP0Nlh-KYaR/exec",
+  intakeSheetURL: "https://script.google.com/macros/s/AKfycbxVLwhU-Q_tgPb4AGVKv-Ro0HHlsU79ltg0RFrXE36PRZ8-JqyyDqW5DiInIKe7nPvzxg/exec",
+
+  meals: [
+    { id:1,  name:"Chicken Shawarma Bowls",          emoji:"🥙", time:45, skill:"Medium", tags:["chicken"],  sides:"Pita Bread" },
+    { id:2,  name:"Mediterranean Chicken Flatbreads", emoji:"🫓", time:40, skill:"Easy",   tags:["chicken"],  sides:"Side Salad" },
+    { id:3,  name:"Spinach & Cheese Stuffed Shells",  emoji:"🐚", time:50, skill:"Medium", tags:["veggie"],   sides:"Garlic Bread" },
+    { id:4,  name:"Buffalo Chicken Rice Bowls",       emoji:"🍚", time:40, skill:"Easy",   tags:["chicken"],  sides:"Carrots & Celery" },
+    { id:5,  name:"Chicken Parmesan",                 emoji:"🍝", time:35, skill:"Medium", tags:["chicken"],  sides:"Spaghetti, Salad" },
+    { id:6,  name:"Shrimp Fried Rice",                emoji:"🍳", time:20, skill:"Easy",   tags:["seafood"],  sides:"Broccoli" },
+    { id:7,  name:"Chicken Teriyaki Bowls",           emoji:"🥢", time:25, skill:"Easy",   tags:["chicken"],  sides:"Broccoli" },
+    { id:8,  name:"Bang Bang Shrimp Bowls",           emoji:"🌶", time:20, skill:"Easy",   tags:["seafood"],  sides:"Slaw" },
+    { id:9,  name:"BBQ Chicken Sandwiches",           emoji:"🥪", time:35, skill:"Easy",   tags:["chicken"],  sides:"Coleslaw, Potatoes" },
+    { id:10, name:"Steakhouse Burgers",               emoji:"🍔", time:20, skill:"Easy",   tags:["beef"],     sides:"Potatoes, Pickles" },
+    { id:11, name:"Shrimp Tacos",                     emoji:"🌮", time:20, skill:"Easy",   tags:["seafood"],  sides:"Lime Rice, Slaw" },
+    { id:12, name:"Sheet Pan Salmon",                 emoji:"🐟", time:25, skill:"Easy",   tags:["seafood"],  sides:"Roasted Veggies" },
+    { id:13, name:"Beef Taco Bowls",                  emoji:"🫙", time:30, skill:"Easy",   tags:["beef"],     sides:"Rice, Sour Cream" },
+    { id:14, name:"One-Pan Lemon Chicken Orzo",       emoji:"🍋", time:35, skill:"Medium", tags:["chicken"],  sides:"Side Salad" }
+  ]
+};
+
+const MEAL_DB = {
+  "Chicken Shawarma Bowls": {
+    emoji:"🥙", time:45, skill:"Medium", sides:"Pita Bread",
+    prepNote:"Marinate chicken in spices and olive oil the night before for deeper flavor.",
+    ingredients:["2 lbs boneless skinless chicken breasts, sliced thin","2 tbsp olive oil","2 tsp paprika, 2 tsp garlic powder, 1 tsp cumin","1 tsp oregano, 1 tsp salt, ½ tsp pepper, ½ tsp cinnamon","2 cups jasmine rice","1 cucumber, diced","2 Roma tomatoes, diced","½ small red onion, thinly sliced","1 cup crumbled feta cheese","1 package pita bread","1 cup plain Greek yogurt","1 tbsp lemon juice, 1 garlic clove minced"],
+    instructions:["Cook jasmine rice per package directions (~18 min).","Toss chicken with olive oil and all seasonings until evenly coated.","Heat large skillet over medium-high. Cook chicken in batches 4–5 min/side until 165°F.","Dice cucumber, tomato, slice onion.","Mix yogurt, lemon juice, garlic, olive oil, and salt for sauce.","Warm pita in a dry skillet 1–2 min.","Assemble bowls with rice, chicken, vegetables, feta, and yogurt sauce."],
+    groceryContributions:{"Meat & Seafood":["2 lbs boneless skinless chicken breasts"],"Produce":["1 cucumber","2 Roma tomatoes","1 small red onion","1 lemon","1 garlic bulb"],"Dairy & Eggs":["1 cup crumbled feta cheese","1 cup plain Greek yogurt"],"Grains & Bread":["2 cups jasmine rice","1 package pita bread"],"Pantry":["Olive oil","Paprika","Garlic powder","Cumin","Oregano","Cinnamon","Salt & pepper"]}
+  },
+  "Mediterranean Chicken Flatbreads": {
+    emoji:"🫓", time:40, skill:"Easy", sides:"Side Salad",
+    prepNote:"Cook and slice chicken ahead; refrigerate up to 1 day.",
+    ingredients:["2 lbs boneless skinless chicken breasts","1 tbsp olive oil","1 tsp garlic powder, 1 tsp oregano, 1 tsp paprika, 1 tsp salt, ½ tsp pepper","4 naan flatbreads","1 cup hummus","1 cucumber, diced","1 cup cherry tomatoes, halved","½ cup crumbled feta","¼ small red onion, sliced","1 cup shredded mozzarella","Fresh parsley for garnish"],
+    instructions:["Preheat oven to 425°F.","Season chicken with olive oil, garlic powder, oregano, paprika, salt, and pepper.","Cook chicken in skillet over medium-high 5–6 min/side until golden and 165°F internally.","Let chicken rest 5 min, then slice thinly.","Spread hummus over naan. Top with mozzarella, chicken, cucumber, tomatoes, feta, onion.","Bake on oven rack or sheet 8–10 min until edges are crisp and cheese melts.","Garnish with parsley before serving."],
+    groceryContributions:{"Meat & Seafood":["2 lbs boneless skinless chicken breasts"],"Produce":["1 cucumber","1 cup cherry tomatoes","¼ red onion","Fresh parsley"],"Dairy & Eggs":["½ cup crumbled feta","1 cup shredded mozzarella"],"Grains & Bread":["4 naan flatbreads"],"Pantry":["1 cup hummus","Olive oil","Garlic powder","Oregano","Paprika"]}
+  },
+  "Spinach & Cheese Stuffed Shells": {
+    emoji:"🐚", time:50, skill:"Medium", sides:"Garlic Bread",
+    prepNote:"Fill shells and refrigerate unbaked up to 24 hours ahead.",
+    ingredients:["1 box jumbo pasta shells","15 oz ricotta cheese","2 cups shredded mozzarella, divided","½ cup grated parmesan","1 egg","3 cups fresh spinach, chopped","1 tsp garlic powder, 1 tsp Italian seasoning, 1 tsp salt, ½ tsp pepper","1 jar marinara sauce (24 oz)","Garlic bread for serving"],
+    instructions:["Preheat oven to 375°F. Boil salted water.","Cook shells 1–2 min less than package instructions so they stay firm. Drain and rinse.","Mix ricotta, 1 cup mozzarella, parmesan, egg, spinach, and seasonings in a large bowl.","Spread half the marinara in a 9×13 baking dish.","Fill each shell with cheese mixture; place in dish. Pour remaining sauce over top; sprinkle with remaining mozzarella.","Cover with foil; bake 20 min. Remove foil; bake another 10 min until bubbly and golden.","Let rest 5 min before serving with garlic bread."],
+    groceryContributions:{"Produce":["3 cups fresh spinach"],"Dairy & Eggs":["15 oz ricotta cheese","2 cups shredded mozzarella","½ cup grated parmesan","1 egg"],"Grains & Bread":["1 box jumbo pasta shells","Garlic bread"],"Pantry":["1 jar marinara sauce (24 oz)","Garlic powder","Italian seasoning"]}
+  },
+  "Buffalo Chicken Rice Bowls": {
+    emoji:"🍚", time:40, skill:"Easy", sides:"Carrots & Celery",
+    prepNote:"Use mild buffalo sauce for kid-friendly heat.",
+    ingredients:["2 lbs boneless skinless chicken breasts, cubed","2 tbsp olive oil","1 tsp garlic powder, 1 tsp paprika, 1 tsp salt, ½ tsp pepper","½ cup buffalo sauce","2 cups jasmine rice","1 cup shredded cheddar cheese","2 carrots, sliced","3 celery stalks, sliced","Ranch dressing","Green onions for garnish"],
+    instructions:["Start rice per package directions.","Toss chicken with olive oil, garlic powder, paprika, salt, and pepper.","Cook chicken in skillet over medium-high 6–8 min, stirring occasionally, until 165°F.","Reduce heat to low; stir in buffalo sauce until fully coated.","Prepare carrots and celery.","Assemble bowls: rice, buffalo chicken, cheddar, carrots, celery, ranch drizzle.","Garnish with sliced green onions."],
+    groceryContributions:{"Meat & Seafood":["2 lbs boneless skinless chicken breasts"],"Produce":["2 carrots","3 celery stalks","2 green onions"],"Dairy & Eggs":["1 cup shredded cheddar cheese","Ranch dressing"],"Grains & Bread":["2 cups jasmine rice"],"Pantry":["½ cup buffalo sauce","Olive oil","Garlic powder","Paprika"]}
+  },
+  "Chicken Parmesan": {
+    emoji:"🍝", time:35, skill:"Medium", sides:"Spaghetti, Salad",
+    prepNote:"Pound and bread chicken the night before; refrigerate uncovered.",
+    ingredients:["4 chicken breasts, pounded evenly","1 cup breadcrumbs","½ cup grated parmesan","1 egg","2 cups marinara sauce","1 cup shredded mozzarella","12 oz spaghetti","Olive oil, salt & pepper"],
+    instructions:["Preheat oven to 375°F. Bring salted water to a boil and cook spaghetti 8–10 min.","Beat egg in one bowl. Mix breadcrumbs + parmesan in another.","Season chicken. Dip in egg, then coat in breadcrumb mixture.","Heat 2–3 tbsp oil in skillet over medium heat. Cook chicken 4–5 min/side until golden.","Transfer to baking dish, add marinara and mozzarella.","Bake 10–15 min until cheese melts and chicken reaches 165°F.","Serve over pasta with salad."],
+    groceryContributions:{"Meat & Seafood":["4 chicken breasts"],"Dairy & Eggs":["½ cup grated parmesan","1 cup shredded mozzarella","1 egg"],"Grains & Bread":["12 oz spaghetti"],"Pantry":["1 cup breadcrumbs","2 cups marinara sauce","Olive oil"]}
+  },
+  "Shrimp Fried Rice": {
+    emoji:"🍳", time:20, skill:"Easy", sides:"Broccoli",
+    prepNote:"Cook rice a day ahead; cold rice fries best.",
+    ingredients:["1 lb shrimp, peeled & deveined","3 cups cold cooked rice","2 cups mixed vegetables (frozen OK)","2 eggs","3 tbsp soy sauce","1 tbsp oil","2 cloves garlic"],
+    instructions:["Pat shrimp dry. Heat pan over medium-high with oil.","Cook shrimp 2–3 min/side until pink. Remove.","Lower heat to medium. Scramble eggs 1–2 min, remove.","Cook veggies 3–4 min, add garlic 30 sec.","Add rice, press into pan, let sit 1–2 min, then stir.","Add shrimp, eggs, soy sauce. Stir-fry 2–3 min and serve."],
+    groceryContributions:{"Meat & Seafood":["1 lb shrimp, peeled & deveined"],"Produce":["2 cloves garlic","2 cups mixed vegetables"],"Dairy & Eggs":["2 eggs"],"Grains & Bread":["3 cups rice (cook ahead)"],"Pantry":["3 tbsp soy sauce","Oil"]}
+  },
+  "Chicken Teriyaki Bowls": {
+    emoji:"🥢", time:25, skill:"Easy", sides:"Broccoli, Cucumber",
+    prepNote:"Cook extra rice for leftovers.",
+    ingredients:["4 chicken breasts","2 cups rice","2 cups broccoli florets","⅓ cup teriyaki sauce","1 tbsp oil"],
+    instructions:["Cook rice per package directions.","Heat oil in skillet over medium-high.","Cook chicken 4–5 min undisturbed, flip and cook 3–4 min.","Reduce heat, add teriyaki sauce, simmer 2–3 min until thickened.","Steam broccoli 4–5 min.","Serve over rice."],
+    groceryContributions:{"Meat & Seafood":["4 chicken breasts"],"Produce":["2 cups broccoli florets"],"Grains & Bread":["2 cups rice"],"Pantry":["⅓ cup teriyaki sauce","Oil"]}
+  },
+  "Bang Bang Shrimp Bowls": {
+    emoji:"🌶", time:20, skill:"Easy", sides:"Slaw",
+    prepNote:"Mix bang bang sauce up to 3 days ahead.",
+    ingredients:["1 lb shrimp, peeled & deveined","2 cups rice","½ cup mayonnaise","2 tbsp sweet chili sauce","1 tbsp sriracha","2 cups coleslaw mix","Oil"],
+    instructions:["Cook rice per package directions.","Mix mayo, sweet chili sauce, and sriracha for bang bang sauce.","Heat pan over medium-high with oil.","Cook shrimp 2–3 min/side until opaque.","Toss shrimp immediately in sauce.","Serve over rice with slaw on side."],
+    groceryContributions:{"Meat & Seafood":["1 lb shrimp, peeled & deveined"],"Produce":["2 cups coleslaw mix"],"Grains & Bread":["2 cups rice"],"Pantry":["½ cup mayonnaise","2 tbsp sweet chili sauce","1 tbsp sriracha","Oil"]}
+  },
+  "BBQ Chicken Sandwiches": {
+    emoji:"🥪", time:35, skill:"Easy", sides:"Coleslaw, Potatoes",
+    prepNote:"Use rotisserie chicken to cut time in half.",
+    ingredients:["4 chicken breasts","½ cup BBQ sauce","4 sandwich buns","2 cups coleslaw mix","3–4 medium potatoes","Olive oil, salt"],
+    instructions:["Preheat oven to 400°F.","Cut potatoes, toss with oil and salt, roast 25 min.","Heat oil in skillet over medium heat.","Cook chicken 6–7 min/side until 165°F.","Rest 5 min, shred, mix with BBQ sauce.","Assemble sandwiches with slaw."],
+    groceryContributions:{"Meat & Seafood":["4 chicken breasts"],"Produce":["3–4 medium potatoes","2 cups coleslaw mix"],"Grains & Bread":["4 sandwich buns"],"Pantry":["½ cup BBQ sauce","Olive oil"]}
+  },
+  "Steakhouse Burgers": {
+    emoji:"🍔", time:20, skill:"Easy", sides:"Potatoes, Pickles",
+    prepNote:"Form patties and season the morning of; refrigerate.",
+    ingredients:["1.5 lbs ground beef (80/20)","4 burger buns","4 cheese slices","Lettuce, tomato","Condiments of choice","3–4 medium potatoes (for roasting)"],
+    instructions:["Form patties, season generously both sides.","Grill or pan over medium-high. Cook 4–5 min — do not press.","Flip, cook 3–4 min. Add cheese last minute.","Rest 2–3 min.","Assemble and serve with roasted potatoes."],
+    groceryContributions:{"Meat & Seafood":["1.5 lbs ground beef (80/20)"],"Produce":["Lettuce","1 tomato","3–4 medium potatoes"],"Dairy & Eggs":["4 slices cheese"],"Grains & Bread":["4 burger buns"],"Pantry":["Condiments"]}
+  },
+  "Shrimp Tacos": {
+    emoji:"🌮", time:20, skill:"Easy", sides:"Lime Rice, Slaw",
+    prepNote:"Slaw and lime crema can be made hours ahead.",
+    ingredients:["1 lb shrimp, peeled & deveined","8–10 small tortillas","2 cups coleslaw mix","½ cup yogurt or sour cream","1 tbsp lime juice","Oil, salt"],
+    instructions:["Pat shrimp dry, season lightly.","Heat pan over medium-high with oil.","Cook shrimp 2 min, flip, cook 1–2 min until opaque.","Mix yogurt, lime juice, and pinch of salt for crema.","Warm tortillas 30 sec/side.","Assemble tacos with shrimp, slaw, and crema."],
+    groceryContributions:{"Meat & Seafood":["1 lb shrimp, peeled & deveined"],"Produce":["2 cups coleslaw mix","1 lime"],"Dairy & Eggs":["½ cup yogurt or sour cream"],"Grains & Bread":["8–10 small tortillas"],"Pantry":["Oil"]}
+  },
+  "Sheet Pan Salmon": {
+    emoji:"🐟", time:25, skill:"Easy", sides:"Roasted Veggies",
+    prepNote:"Season salmon up to 2 hours ahead; keep refrigerated.",
+    ingredients:["4–5 salmon fillets (about 2 lbs)","2 tbsp olive oil","1 tsp garlic powder, 1 tsp paprika, salt & pepper","1 lemon, sliced","2 cups broccoli florets","1 cup cherry tomatoes","Fresh parsley for garnish"],
+    instructions:["Preheat oven to 400°F. Line a large sheet pan with foil.","Toss broccoli and tomatoes with olive oil, salt, and pepper. Spread on pan.","Roast veggies 10 min.","Season salmon with garlic powder, paprika, salt, pepper, and a drizzle of olive oil.","Push veggies to sides, place salmon on pan. Top with lemon slices.","Roast 12–15 min until salmon flakes easily.","Garnish with parsley and serve directly from pan."],
+    groceryContributions:{"Meat & Seafood":["2 lbs salmon fillets"],"Produce":["2 cups broccoli florets","1 cup cherry tomatoes","1 lemon","Fresh parsley"],"Pantry":["Olive oil","Garlic powder","Paprika"]}
+  },
+  "Beef Taco Bowls": {
+    emoji:"🫙", time:30, skill:"Easy", sides:"Rice, Sour Cream",
+    prepNote:"Seasoned beef keeps well — make a double batch.",
+    ingredients:["1.5 lbs ground beef","2 cups rice","1 packet taco seasoning (or 2 tsp cumin, 1 tsp chili powder, 1 tsp garlic powder)","½ cup water","1 cup shredded cheddar cheese","½ cup sour cream","1 cup salsa","1 cup shredded lettuce","1 avocado, diced"],
+    instructions:["Cook rice per package directions.","Brown ground beef in skillet over medium-high, breaking into crumbles, 5–7 min.","Drain excess fat. Add taco seasoning and ½ cup water; simmer 3–4 min.","Assemble bowls: rice, seasoned beef, cheese, lettuce, salsa, sour cream.","Top with diced avocado."],
+    groceryContributions:{"Meat & Seafood":["1.5 lbs ground beef"],"Produce":["Shredded lettuce","1 avocado"],"Dairy & Eggs":["1 cup shredded cheddar cheese","½ cup sour cream"],"Grains & Bread":["2 cups rice"],"Pantry":["Taco seasoning","1 cup salsa"]}
+  },
+  "One-Pan Lemon Chicken Orzo": {
+    emoji:"🍋", time:35, skill:"Medium", sides:"Side Salad",
+    prepNote:"Use low-sodium broth to control saltiness.",
+    ingredients:["4 chicken breasts","1.5 cups orzo pasta","3 cups chicken broth","1 lemon (juice + zest)","3 cloves garlic, minced","1 cup cherry tomatoes","2 cups fresh spinach","½ cup grated parmesan","2 tbsp olive oil","1 tsp oregano, salt & pepper"],
+    instructions:["Season chicken with salt, pepper, and oregano.","Heat olive oil in large oven-safe skillet over medium-high. Sear chicken 4–5 min/side until golden. Remove.","Add garlic; sauté 30 sec. Add orzo, toast 1–2 min.","Pour in broth and lemon juice; bring to simmer.","Nestle chicken back in. Cover and cook 12–15 min until orzo is tender.","Stir in cherry tomatoes, spinach, lemon zest, and parmesan until spinach wilts.","Serve directly from pan."],
+    groceryContributions:{"Meat & Seafood":["4 chicken breasts"],"Produce":["1 lemon","3 cloves garlic","1 cup cherry tomatoes","2 cups fresh spinach"],"Dairy & Eggs":["½ cup grated parmesan"],"Grains & Bread":["1.5 cups orzo pasta"],"Pantry":["3 cups chicken broth","Olive oil","Oregano"]}
+  }
+};
+
+const CAT_META = {
+  "Meat & Seafood": { icon:"🥩", order:1 },
+  "Produce":        { icon:"🥦", order:2 },
+  "Dairy & Eggs":   { icon:"🧀", order:3 },
+  "Grains & Bread": { icon:"🍞", order:4 },
+  "Pantry":         { icon:"🫙", order:5 }
+};
+
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+</script>
+
+<!-- ════════════════ SCREEN 1: INTAKE ════════════════ -->
+<div id="screen-intake" class="screen active">
+  <div class="db-header">
+    <div class="logo"><div class="logo-dot"></div> Dinner Buddy</div>
+    <div class="header-right">About 2–3 min</div>
+  </div>
+  <div class="intake-body">
+    <h1 class="intake-title">Tell us about your <em>family</em></h1>
+    <p class="intake-sub">Fill this out once — we use it to personalize your weekly plan every week.</p>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="i-prog-fill"></div></div>
+      <div class="progress-label" id="i-prog-label">0 of 23 answered</div>
+    </div>
+
+    <div class="name-box">
+      <label for="i-name">Your first name</label>
+      <input type="text" id="i-name" placeholder="e.g. Sarah" maxlength="40" oninput="iProgress()">
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">🏠</span><span class="i-section-title">Your household</span></div>
+      <div class="two-col">
+        <div class="i-field"><label>Adults <span class="qnum">Q1</span></label><select id="i-adults" onchange="iProgress()"><option value="">Select</option><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+        <div class="i-field"><label>Kids under 18 <span class="qnum">Q2</span></label><select id="i-kids" onchange="iProgress()"><option value="">Select</option><option selected>0</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></div>
+      </div>
+      <div class="two-col">
+        <div class="i-field"><label>Zip code <span class="qnum">Q3</span></label><input type="text" id="i-zip" placeholder="e.g. 80210" maxlength="5" oninput="iProgress()"></div>
+        <div class="i-field"><label>Dinners per week <span class="qnum">Q4</span></label><select id="i-dinners" onchange="iProgress()"><option value="">Select</option><option>3</option><option>4</option><option>5</option><option selected>6</option><option>7</option></select></div>
+      </div>
+      <div class="i-field"><label>Ages of kids <span class="qnum">Q5 · optional</span></label><span class="hint">Helps with portion sizes and recipe complexity</span><input type="text" id="i-kidages" placeholder="e.g. 4, 8, 12" oninput="iProgress()"></div>
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">⚠️</span><span class="i-section-title">Allergies & restrictions</span></div>
+      <div class="i-field"><label>Allergies — select all that apply <span class="qnum">Q6</span></label>
+        <div class="chip-group" id="cg-allergies">
+          <span class="chip on" onclick="toggleChip(this)" data-val="None">None</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Gluten">Gluten</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Dairy">Dairy</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Eggs">Eggs</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Tree nuts">Tree nuts</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Peanuts">Peanuts</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Shellfish">Shellfish</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Fish">Fish</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Soy">Soy</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Sesame">Sesame</span>
+        </div>
+      </div>
+      <div class="i-field"><label>Dietary style <span class="qnum">Q7</span></label>
+        <div class="chip-group" id="cg-diet">
+          <span class="chip on" onclick="toggleChip(this)" data-val="No restrictions">No restrictions</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Vegetarian">Vegetarian</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Vegan">Vegan</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Pescatarian">Pescatarian</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Low carb / keto">Low carb / keto</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Halal">Halal</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Kosher">Kosher</span>
+        </div>
+      </div>
+      <div class="i-field"><label>Anything else to avoid? <span class="qnum">Q8 · optional</span></label><input type="text" id="i-avoid" placeholder="e.g. mushrooms, cilantro, spicy food" oninput="iProgress()"></div>
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">❤️</span><span class="i-section-title">Food preferences</span></div>
+      <div class="i-field"><label>Cuisines you enjoy <span class="qnum">Q9</span></label>
+        <div class="chip-group" id="cg-cuisines">
+          <span class="chip" onclick="toggleChip(this)" data-val="American">American</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Italian">Italian</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Mexican">Mexican</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Asian">Asian</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Mediterranean">Mediterranean</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Indian">Indian</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Middle Eastern">Middle Eastern</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Latin American">Latin American</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Surprise me">Surprise me</span>
+        </div>
+      </div>
+      <div class="i-field"><label>Protein preferences <span class="qnum">Q10</span></label>
+        <div class="chip-group" id="cg-proteins">
+          <span class="chip" onclick="toggleChip(this)" data-val="Chicken">Chicken</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Beef">Beef</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Pork">Pork</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Shrimp">Shrimp</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Fish / salmon">Fish / salmon</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Turkey">Turkey</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Plant-based">Plant-based</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Eggs / tofu">Eggs / tofu</span>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="i-field"><label>Spice tolerance <span class="qnum">Q11</span></label><select id="i-spice" onchange="iProgress()"><option value="">Select</option><option>Mild only</option><option selected>Some spice is fine</option><option>Bring the heat</option></select></div>
+        <div class="i-field"><label>Variety vs. routine <span class="qnum">Q12</span></label><select id="i-variety" onchange="iProgress()"><option value="">Select</option><option>Rotate same ~10 meals</option><option selected>Mix of familiar + new</option><option>Always try new things</option></select></div>
+      </div>
+      <div class="i-field"><label>How adventurous are your kids? <span class="qnum">Q13</span></label><select id="i-kids-adv" onchange="iProgress()"><option value="">Select</option><option>No kids / not relevant</option><option>Very picky — keep it simple</option><option selected>Moderately adventurous</option><option>They'll eat anything</option></select></div>
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">⏱️</span><span class="i-section-title">Cooking time & skill</span></div>
+      <div class="i-field"><label>Time on a typical weeknight <span class="qnum">Q14</span></label>
+        <div class="radio-group">
+          <label class="radio-row"><input type="radio" name="i-time" value="Under 20 min" onchange="iProgress()"> Under 20 minutes</label>
+          <label class="radio-row"><input type="radio" name="i-time" value="20–35 min" checked onchange="iProgress()"> 20–35 minutes</label>
+          <label class="radio-row"><input type="radio" name="i-time" value="35–60 min" onchange="iProgress()"> 35–60 minutes</label>
+          <label class="radio-row"><input type="radio" name="i-time" value="60+ min" onchange="iProgress()"> 60+ minutes is fine</label>
+        </div>
+      </div>
+      <div class="i-field"><label>Are weekends different? <span class="qnum">Q15</span></label><select id="i-weekends" onchange="iProgress()"><option value="">Select</option><option>Same as weeknights</option><option selected>More time on weekends</option><option>Less time on weekends</option></select></div>
+      <div class="i-field"><label>Cooking confidence <span class="qnum">Q16</span></label>
+        <div class="radio-group">
+          <label class="radio-row"><input type="radio" name="i-skill" value="Beginner" onchange="iProgress()"> Beginner — I need detailed steps</label>
+          <label class="radio-row"><input type="radio" name="i-skill" value="Home cook" checked onchange="iProgress()"> Home cook — comfortable with most techniques</label>
+          <label class="radio-row"><input type="radio" name="i-skill" value="Experienced" onchange="iProgress()"> Experienced — I can improvise</label>
+        </div>
+      </div>
+      <div class="i-field"><label>Meal prep habits <span class="qnum">Q17</span></label>
+        <div class="chip-group" id="cg-prep">
+          <span class="chip" onclick="toggleChip(this)" data-val="Batch cook weekends">Batch cook on weekends</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Like prep-ahead tips">Like prep-ahead tips</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Cook fresh each night">Cook fresh each night</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Leftovers are great">Leftovers are great</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">💰</span><span class="i-section-title">Budget</span></div>
+      <div class="i-field"><label>Weekly grocery budget for dinners <span class="qnum">Q18</span></label><select id="i-budget" onchange="iProgress()"><option value="">Select</option><option>Under $75</option><option>$75–$100</option><option selected>$100–$150</option><option>$150–$200</option><option>$200+</option><option>No preference</option></select></div>
+      <div class="i-field"><label>How important is minimizing food waste? <span class="qnum">Q19</span></label>
+        <div class="radio-group">
+          <label class="radio-row"><input type="radio" name="i-waste" value="Not a priority" onchange="iProgress()"> Not a priority</label>
+          <label class="radio-row"><input type="radio" name="i-waste" value="Reuse ingredients" checked onchange="iProgress()"> Somewhat — reuse ingredients when possible</label>
+          <label class="radio-row"><input type="radio" name="i-waste" value="Very important" onchange="iProgress()"> Very — share ingredients across meals</label>
+        </div>
+      </div>
+      <div class="i-field"><label>Store preferences <span class="qnum">Q20</span></label>
+        <div class="chip-group" id="cg-stores">
+          <span class="chip on" onclick="toggleChip(this)" data-val="No preference">No preference</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Costco">Costco / warehouse</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Whole Foods">Whole Foods / organic</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Budget grocery">Budget grocery</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Online / delivery">Online / delivery</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">🍳</span><span class="i-section-title">Kitchen & equipment</span></div>
+      <div class="i-field"><label>What do you have? <span class="qnum">Q21</span></label>
+        <div class="chip-group" id="cg-equipment">
+          <span class="chip" onclick="toggleChip(this)" data-val="Instant Pot">Instant Pot</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Air fryer">Air fryer</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Slow cooker">Slow cooker</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Outdoor grill">Outdoor grill</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Stand mixer">Stand mixer</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Rice cooker">Rice cooker</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Wok / cast iron">Wok / cast iron</span>
+          <span class="chip on" onclick="toggleChip(this)" data-val="Standard pots and pans">Standard pots & pans</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="i-section">
+      <div class="i-section-head"><span class="i-section-icon">✨</span><span class="i-section-title">Goals & extras</span></div>
+      <div class="i-field"><label>What matters most? <span class="qnum">Q22 · pick up to 3</span></label>
+        <div class="chip-group" id="cg-goals">
+          <span class="chip" onclick="toggleChip(this)" data-val="Save time">Save time</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Save money">Save money</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Eat healthier">Eat healthier</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Reduce stress">Reduce stress</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Discover new recipes">Discover new recipes</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Get kids to eat better">Get kids to eat better</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Cook together as family">Cook together as family</span>
+          <span class="chip" onclick="toggleChip(this)" data-val="Manage weight">Manage / lose weight</span>
+        </div>
+      </div>
+      <div class="i-field"><label>Anything else we should know? <span class="qnum">Q23 · optional</span></label><textarea id="i-notes" placeholder="e.g. Taco Tuesday every week. One person has texture issues with mushrooms. Nut-free school policy..." oninput="iProgress()"></textarea></div>
+    </div>
+
+    <div class="submit-wrap">
+      <button class="btn-primary" id="i-submit-btn" onclick="submitIntake()">
+        Build my meal plan
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <p style="text-align:center;margin-top:10px;font-size:12px;color:var(--ink-faint)">Takes about 2–3 min · saved once, used every week</p>
+      <p class="skip-link">Already filled this out? <a href="#" onclick="goToSelector();return false;">Skip to this week's meals →</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN 2: BUILDING ════════════════ -->
+<div id="screen-building" class="screen">
+  <div class="logo" style="margin-bottom:40px"><div class="logo-dot"></div> Dinner Buddy</div>
+  <div class="building-plate-wrap">
+    <div class="building-plate">🍽️</div>
+    <span class="sparkle">✨</span>
+    <span class="sparkle">⭐</span>
+    <span class="sparkle">✨</span>
+  </div>
+  <h1 class="building-title">Building your plan, <em id="b-name">friend</em></h1>
+  <p class="building-sub">Putting together this week's meal options based on your preferences.</p>
+  <div class="bsteps">
+    <div class="bstep" id="bstep1"><span class="bstep-icon">📋</span><span>Reading your preferences</span><div class="bstep-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+    <div class="bstep" id="bstep2"><span class="bstep-icon">🍳</span><span>Selecting this week's meals</span><div class="bstep-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+    <div class="bstep" id="bstep3"><span class="bstep-icon">🛒</span><span>Preparing your grocery list</span><div class="bstep-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+  </div>
+  <button class="continue-btn" id="b-continue" onclick="goToSelector()">
+    See my meals
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<!-- ════════════════ SCREEN 3: SELECTOR ════════════════ -->
+<div id="screen-selector" class="screen">
+  <div class="db-header">
+    <div class="logo"><div class="logo-dot"></div> Dinner Buddy</div>
+    <div class="header-right">
+      <div id="s-week-label" style="margin-bottom:2px"></div>
+      <div class="pip-pill">
+        <div class="pip-track"><div class="pip-fill" id="s-pip-fill"></div></div>
+        <span id="s-pip-count" style="font-weight:500">0</span><span style="color:var(--ink-light);font-weight:400"> / 7</span>
+      </div>
+    </div>
+  </div>
+  <div class="sel-hero">
+    <h1>Pick your <em>7 dinners</em></h1>
+    <p id="s-hero-sub"></p>
+  </div>
+  <div class="filter-bar">
+    <span class="filter-label">Filter</span>
+    <button class="fb on" onclick="setFilter('all',this)">All 14</button>
+    <button class="fb" onclick="setFilter('chicken',this)">Chicken</button>
+    <button class="fb" onclick="setFilter('beef',this)">Beef</button>
+    <button class="fb" onclick="setFilter('seafood',this)">Seafood</button>
+    <button class="fb" onclick="setFilter('veggie',this)">Veggie</button>
+    <button class="fb" onclick="setFilter('under30',this)">Under 30 min</button>
+    <button class="fb" onclick="setFilter('easy',this)">Easy only</button>
+  </div>
+  <div class="meal-grid-wrap">
+    <div class="meal-grid" id="meal-grid"></div>
+  </div>
+  <div class="sel-footer">
+    <div class="sel-pills" id="sel-pills"><span class="sel-empty">Select 7 meals above to build your week</span></div>
+    <button class="sel-submit" id="sel-submit" disabled onclick="openNameModal()">
+      Build my plan
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="name-modal-bg" id="name-modal-bg">
+  <div class="name-modal">
+    <h2>Almost there!</h2>
+    <p>Confirm your name so we know whose plan this is.</p>
+    <input type="text" id="modal-name" placeholder="First name" maxlength="40" onkeydown="if(event.key==='Enter')confirmMealSubmit()">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeNameModal()">Back</button>
+      <button class="modal-confirm" onclick="confirmMealSubmit()">See my plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN 4: PLAN ════════════════ -->
+<div id="screen-plan" class="screen">
+  <div class="db-header">
+    <div class="logo"><div class="logo-dot"></div> Dinner Buddy</div>
+    <div class="header-right" id="plan-header-right"></div>
+  </div>
+  <div class="plan-body">
+    <div class="plan-week-strip" id="plan-week-strip"></div>
+    <div class="plan-actions">
+      <button class="plan-btn primary" onclick="window.print()">Print / Save PDF</button>
+      <button class="plan-btn" onclick="resetGroceryChecks()">Reset grocery checks</button>
+      <button class="plan-btn" onclick="goToSelector()">← Change meals</button>
+    </div>
+    <h2 class="plan-section-title">Consolidated <em>grocery list</em></h2>
+    <p class="grocery-intro" id="plan-grocery-intro"></p>
+    <div class="grocery-grid" id="plan-grocery-grid"></div>
+    <h2 class="plan-section-title">This week's <em>recipes</em></h2>
+    <div class="recipes-list" id="plan-recipes"></div>
+  </div>
+</div>
+
+<!-- ════════════════ JAVASCRIPT ════════════════ -->
+<script>
+// ── SCREEN MANAGEMENT ──
+let currentScreen = 'intake';
+let appName = '';
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  currentScreen = id;
+  window.scrollTo(0, 0);
+}
+
+// ── INTAKE ──
+function toggleChip(el) {
+  el.classList.toggle('on');
+  iProgress();
+}
+
+function getChips(groupId) {
+  return [...document.querySelectorAll('#' + groupId + ' .chip.on')].map(c => c.dataset.val).join(', ');
+}
+
+const I_TOTAL = 23;
+function iProgress() {
+  let n = 0;
+  ['i-adults','i-kids','i-zip','i-dinners','i-spice','i-variety','i-kids-adv','i-weekends','i-budget'].forEach(id => {
+    const el = document.getElementById(id); if (el && el.value) n++;
+  });
+  if (document.getElementById('i-name').value.trim()) n++;
+  if (document.getElementById('i-kidages').value.trim()) n++;
+  if (document.getElementById('i-avoid').value.trim()) n++;
+  if (document.getElementById('i-notes').value.trim()) n++;
+  ['cg-allergies','cg-diet','cg-cuisines','cg-proteins','cg-prep','cg-stores','cg-equipment','cg-goals'].forEach(id => {
+    if (document.querySelectorAll('#' + id + ' .chip.on').length > 0) n++;
+  });
+  if (document.querySelector('input[name="i-time"]:checked')) n++;
+  if (document.querySelector('input[name="i-skill"]:checked')) n++;
+  if (document.querySelector('input[name="i-waste"]:checked')) n++;
+  n = Math.min(n, I_TOTAL);
+  document.getElementById('i-prog-fill').style.width = Math.round((n / I_TOTAL) * 100) + '%';
+  document.getElementById('i-prog-label').textContent = n + ' of ' + I_TOTAL + ' answered';
+}
+
+function submitIntake() {
+  const name = document.getElementById('i-name').value.trim();
+  if (!name) { document.getElementById('i-name').focus(); document.getElementById('i-name').style.borderColor = 'var(--amber)'; return; }
+  appName = name;
+
+  const data = {
+    timestamp: new Date().toISOString(), name,
+    adults:    document.getElementById('i-adults').value,
+    kids:      document.getElementById('i-kids').value,
+    kid_ages:  document.getElementById('i-kidages').value.trim(),
+    zip:       document.getElementById('i-zip').value.trim(),
+    dinners:   document.getElementById('i-dinners').value,
+    allergies: getChips('cg-allergies'),
+    diet:      getChips('cg-diet'),
+    avoid:     document.getElementById('i-avoid').value.trim(),
+    cuisines:  getChips('cg-cuisines'),
+    proteins:  getChips('cg-proteins'),
+    spice:     document.getElementById('i-spice').value,
+    variety:   document.getElementById('i-variety').value,
+    kids_adv:  document.getElementById('i-kids-adv').value,
+    cook_time: document.querySelector('input[name="i-time"]:checked')?.value || '',
+    weekends:  document.getElementById('i-weekends').value,
+    skill:     document.querySelector('input[name="i-skill"]:checked')?.value || '',
+    prep:      getChips('cg-prep'),
+    budget:    document.getElementById('i-budget').value,
+    waste:     document.querySelector('input[name="i-waste"]:checked')?.value || '',
+    stores:    getChips('cg-stores'),
+    equipment: getChips('cg-equipment'),
+    goals:     getChips('cg-goals'),
+    notes:     document.getElementById('i-notes').value.trim()
+  };
+
+  const btn = document.getElementById('i-submit-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  if (CONFIG.intakeSheetURL) {
+    const img = new Image();
+    img.src = CONFIG.intakeSheetURL + '?' + new URLSearchParams(data).toString();
+  }
+
+  setTimeout(() => { showBuilding(); }, 1200);
+}
+
+// ── BUILDING ──
+function showBuilding() {
+  showScreen('building');
+  document.getElementById('b-name').textContent = appName || 'friend';
+  const steps = ['bstep1','bstep2','bstep3'];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      el.classList.add('vis');
+      setTimeout(() => el.classList.add('done'), 600);
+    }, 500 + i * 800);
+  });
+  setTimeout(() => { document.getElementById('b-continue').classList.add('vis'); }, 3200);
+}
+
+function goToSelector() {
+  document.getElementById('s-week-label').textContent = CONFIG.weekLabel;
+  document.getElementById('s-hero-sub').textContent = CONFIG.familyLabel + ' · ' + CONFIG.weekLabel;
+  if (appName) document.getElementById('modal-name').value = appName;
+  renderMealGrid();
+  showScreen('selector');
+}
+
+// ── SELECTOR ──
+let selSelected = new Set();
+let selDayMap = {};
+let selFilter = 'all';
+const SEL_MAX = 7;
+
+function setFilter(f, btn) {
+  selFilter = f;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderMealGrid();
+}
+
+function mealMatches(m) {
+  if (selFilter === 'all') return true;
+  if (selFilter === 'under30') return m.time <= 30;
+  if (selFilter === 'easy') return m.skill === 'Easy';
+  return m.tags.includes(selFilter);
+}
+
+function renderMealGrid() {
+  const grid = document.getElementById('meal-grid');
+  grid.innerHTML = '';
+  const maxed = selSelected.size >= SEL_MAX;
+
+  CONFIG.meals.forEach(m => {
+    if (!mealMatches(m)) return;
+    const isSel = selSelected.has(m.id);
+    const card = document.createElement('div');
+    card.className = 'mcard' + (isSel ? ' sel' : '') + (!isSel && maxed ? ' maxed' : '');
+    card.onclick = () => { if (!isSel && maxed) return; toggleMeal(m.id); };
+
+    const dayRowHTML = isSel ? `
+      <div class="day-row" onclick="event.stopPropagation()">
+        ${DAYS.map(d => {
+          const taken = selDayMap[d] && selDayMap[d] !== m.id;
+          const mine = selDayMap[d] === m.id;
+          return '<button class="day-btn' + (mine ? ' mine' : '') + '"' + (taken ? ' disabled' : '') + ' onclick="assignDay(\'' + d + '\',' + m.id + ')">' + d[0] + '</button>';
+        }).join('')}
+      </div>` : '';
+
+    card.innerHTML = `
+      <div class="mcard-emoji">
+        <span>${m.emoji}</span>
+        <div class="mcard-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </div>
+      <div class="mcard-body">
+        <p class="mcard-name">${m.name}</p>
+        <div class="mcard-tags">
+          <span class="mtag mtag-time">${m.time} min</span>
+          <span class="mtag ${m.skill === 'Easy' ? 'mtag-easy' : 'mtag-med'}">${m.skill}</span>
+        </div>
+        <p class="mcard-sides">Sides: ${m.sides}</p>
+        ${dayRowHTML}
+      </div>`;
+    grid.appendChild(card);
+  });
+  updateSelProgress();
+  updateSelFooter();
+}
+
+function toggleMeal(id) {
+  if (selSelected.has(id)) {
+    selSelected.delete(id);
+    Object.keys(selDayMap).forEach(d => { if (selDayMap[d] === id) delete selDayMap[d]; });
+  } else {
+    if (selSelected.size >= SEL_MAX) return;
+    selSelected.add(id);
+  }
+  renderMealGrid();
+}
+
+function assignDay(day, mealId) {
+  Object.keys(selDayMap).forEach(d => { if (selDayMap[d] === mealId) delete selDayMap[d]; });
+  if (selDayMap[day] === mealId) { delete selDayMap[day]; }
+  else { selDayMap[day] = mealId; }
+  renderMealGrid();
+}
+
+function updateSelProgress() {
+  const n = selSelected.size;
+  document.getElementById('s-pip-fill').style.width = Math.round((n / SEL_MAX) * 100) + '%';
+  document.getElementById('s-pip-count').textContent = n;
+  document.getElementById('sel-submit').disabled = n < SEL_MAX;
+}
+
+function updateSelFooter() {
+  const el = document.getElementById('sel-pills');
+  const pills = DAYS.map(d => {
+    const id = selDayMap[d]; if (!id) return '';
+    const m = CONFIG.meals.find(x => x.id === id);
+    return '<span class="sel-pill"><strong>' + d + ':</strong> ' + m.name.split(' ').slice(0,3).join(' ') + '</span>';
+  }).filter(Boolean).join('');
+  if (pills) el.innerHTML = pills;
+  else if (selSelected.size > 0) el.innerHTML = '<span class="sel-empty">' + selSelected.size + '/7 selected — tap day letters to schedule</span>';
+  else el.innerHTML = '<span class="sel-empty">Select 7 meals above to build your week</span>';
+}
+
+function openNameModal() {
+  document.getElementById('name-modal-bg').classList.add('open');
+  const inp = document.getElementById('modal-name');
+  if (appName) inp.value = appName;
+  inp.focus();
+}
+function closeNameModal() { document.getElementById('name-modal-bg').classList.remove('open'); }
+
+function confirmMealSubmit() {
+  const name = document.getElementById('modal-name').value.trim();
+  if (!name) { document.getElementById('modal-name').focus(); return; }
+  closeNameModal();
+  appName = name;
+
+  const selections = [...selSelected].map(id => CONFIG.meals.find(m => m.id === id).name);
+  const scheduleStr = DAYS.map(d => {
+    const id = selDayMap[d];
+    return d + ': ' + (id ? CONFIG.meals.find(m => m.id === id).name : '(unassigned)');
+  }).join(', ');
+
+  if (CONFIG.mealSheetURL) {
+    const img = new Image();
+    img.src = CONFIG.mealSheetURL + '?' + new URLSearchParams({
+      name, week: CONFIG.weekLabel,
+      meals: selections.join(' | '),
+      schedule: scheduleStr,
+      timestamp: new Date().toISOString()
+    }).toString();
+  }
+
+  setTimeout(() => { buildPlanScreen(); showScreen('plan'); }, 1200);
+
+  const btn = document.getElementById('sel-submit');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+}
+
+// ── PLAN ──
+function buildPlanScreen() {
+  const meals = DAYS.map(d => ({ day: d, meal: selDayMap[d] ? CONFIG.meals.find(m => m.id === selDayMap[d]).name : null })).filter(x => x.meal);
+
+  // Header
+  document.getElementById('plan-header-right').innerHTML = CONFIG.weekLabel + '<br>' + CONFIG.familyLabel;
+
+  // Week strip
+  const strip = document.getElementById('plan-week-strip');
+  strip.innerHTML = '';
+  meals.forEach(({ day, meal }) => {
+    const db = MEAL_DB[meal] || {};
+    strip.innerHTML += '<div class="plan-day"><div class="plan-day-name">' + day + '</div><div class="plan-day-emoji">' + (db.emoji || '🍽') + '</div><div class="plan-day-meal">' + meal.split(' ').slice(0,3).join(' ') + '</div></div>';
+  });
+
+  // Grocery list
+  const merged = {};
+  meals.forEach(({ meal }) => {
+    const db = MEAL_DB[meal]; if (!db) return;
+    Object.entries(db.groceryContributions).forEach(([cat, items]) => {
+      if (!merged[cat]) merged[cat] = new Set();
+      items.forEach(item => merged[cat].add(item));
+    });
+  });
+
+  document.getElementById('plan-grocery-intro').textContent = 'Everything you need for all 7 meals · ' + CONFIG.familyLabel + ' · Check off items you already have';
+
+  const ggrid = document.getElementById('plan-grocery-grid');
+  ggrid.innerHTML = '';
+  const sortedCats = Object.keys(merged).sort((a,b) => ((CAT_META[a]||{order:99}).order) - ((CAT_META[b]||{order:99}).order));
+  sortedCats.forEach(cat => {
+    const items = [...merged[cat]];
+    const meta = CAT_META[cat] || { icon:'📦' };
+    const div = document.createElement('div');
+    div.className = 'gcat';
+    div.innerHTML = '<div class="gcat-head"><span class="gcat-icon">' + meta.icon + '</span><span class="gcat-name">' + cat + '</span><span class="gcat-count">' + items.length + ' items</span></div><div class="gcat-items">' +
+      items.map((item, i) => '<div class="gitem" onclick="toggleGrocery(this)" data-id="' + cat + '-' + i + '"><div class="gcheck"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span class="gitem-name">' + item + '</span></div>').join('') +
+      '</div>';
+    ggrid.appendChild(div);
+  });
+
+  // Recipes
+  const rlist = document.getElementById('plan-recipes');
+  rlist.innerHTML = '';
+  meals.forEach(({ day, meal }) => {
+    const db = MEAL_DB[meal]; if (!db) return;
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.innerHTML = '<div class="recipe-head"><div class="recipe-emoji">' + db.emoji + '</div><div class="recipe-info"><div class="recipe-name">' + meal + '</div><span class="recipe-day-badge">' + day + '</span><div class="recipe-tags"><span class="rtag">' + db.time + ' min</span><span class="rtag">' + db.skill + '</span><span class="rtag">Sides: ' + db.sides + '</span></div></div></div>' +
+      '<div class="recipe-body"><div class="recipe-ing"><div class="col-label">Ingredients</div><ul class="ing-list">' + db.ingredients.map(i => '<li>' + i + '</li>').join('') + '</ul></div>' +
+      '<div class="recipe-inst"><div class="col-label">Instructions</div><ol class="inst-list">' + db.instructions.map(s => '<li>' + s + '</li>').join('') + '</ol></div></div>' +
+      '<div class="prep-note">Prep tip: ' + db.prepNote + '</div>';
+    rlist.appendChild(card);
+  });
+
+  loadGroceryChecks();
+}
+
+function toggleGrocery(el) { el.classList.toggle('checked'); saveGroceryChecks(); }
+function saveGroceryChecks() {
+  const checked = [...document.querySelectorAll('.gitem.checked')].map(el => el.dataset.id);
+  try { localStorage.setItem('db-checks-' + CONFIG.weekLabel, JSON.stringify(checked)); } catch(e) {}
+}
+function loadGroceryChecks() {
+  try {
+    JSON.parse(localStorage.getItem('db-checks-' + CONFIG.weekLabel) || '[]').forEach(id => {
+      const el = document.querySelector('[data-id="' + id + '"]');
+      if (el) el.classList.add('checked');
+    });
+  } catch(e) {}
+}
+function resetGroceryChecks() {
+  document.querySelectorAll('.gitem.checked').forEach(el => el.classList.remove('checked'));
+  try { localStorage.removeItem('db-checks-' + CONFIG.weekLabel); } catch(e) {}
+}
+
+// ── INIT ──
+iProgress();
+</script>
+</body>
+</html>
